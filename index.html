@@ -6,18 +6,43 @@
 <title>Autonomic Drug Sorting Game</title> 
 <style> 
 /* Forces the webpage to take up 100% of the browser window size */ 
-html, body { margin: 0; padding: 0; width: 100%; height: 100%; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f3f4; overflow-x: hidden; /* Prevents awkward side-scrolling */ } 
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f3f4; overflow-x: hidden; } 
 body { display: flex; flex-direction: column; padding: 15px; } 
-header { text-align: center; margin-bottom: 15px; flex-shrink: 0; /* Keeps header from shrinking */ } 
+header { text-align: center; margin-bottom: 15px; flex-shrink: 0; } 
 h1 { color: #2c3e50; margin: 0 0 5px 0; font-size: 1.8rem; } 
 p { color: #7f8c8d; margin: 0; font-size: 0.95rem; } 
-/* The main container now stretches to fill remaining vertical space */ 
-#game-container { display: flex; flex-direction: column; flex-grow: 1; width: 100%; gap: 15px; min-height: 0; /* Critical for inner scroll mechanics */ } 
+
+#game-container { display: flex; flex-direction: column; flex-grow: 1; width: 100%; gap: 15px; min-height: 0; } 
 #cards-pool { display: flex; flex-wrap: wrap; gap: 10px; padding: 15px; background: #ffffff; border: 2px dashed #b2bec3; border-radius: 8px; min-height: 80px; justify-content: center; align-items: center; flex-shrink: 0; } 
-.drug-card { background-color: #0984e3; color: white; padding: 10px 16px; border-radius: 20px; cursor: grab; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); user-select: none; transition: transform 0.2s; font-size: 0.95rem; margin: 4px 2px; display: inline-block; } 
+
+/* Card styling updated to support 3D Flipping mechanics */
+.drug-card { 
+    background-color: #0984e3; 
+    color: white; 
+    padding: 10px 16px; 
+    border-radius: 20px; 
+    cursor: grab; 
+    font-weight: bold; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+    user-select: none; 
+    transition: transform 0.2s, background-color 0.3s; 
+    font-size: 0.95rem; 
+    margin: 4px 2px; 
+    display: inline-block; 
+    text-align: center;
+} 
 .drug-card:active { cursor: grabbing; transform: scale(1.05); } 
-/* The buckets grid now automatically maximizes to fill the entire remaining screen layout */ 
-#classes-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; flex-grow: 1; min-height: 0; overflow-y: auto; /* Allows scrolling inside the game area if window is small */ padding-bottom: 10px; } 
+
+/* Special styling for cards that have successfully landed in a bucket */
+.matched-card {
+    background-color: #2ecc71 !important;
+    cursor: pointer !important; /* Changes to a hand pointer indicating it can be clicked */
+}
+.side-effects-revealed {
+    background-color: #e67e22 !important; /* Shifts to orange to clearly show it is displaying side effects */
+}
+
+#classes-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; flex-grow: 1; min-height: 0; overflow-y: auto; padding-bottom: 10px; } 
 .class-bucket { background-color: #ffffff; border: 2px solid #dfe6e9; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: background 0.2s; min-height: 120px; } 
 .class-bucket h3 { margin: 0 0 5px 0; text-align: center; color: #2d3436; border-bottom: 2px solid #00b894; padding-bottom: 5px; font-size: 0.95rem; } 
 .drag-over { background-color: #e8f8f5; border-color: #00b894; } 
@@ -30,68 +55,54 @@ p { color: #7f8c8d; margin: 0; font-size: 0.95rem; }
 <body> 
 <header> 
 <h1>Autonomic Pharmacology Sorting Game</h1> 
-<p>Drag each medication card into its correct receptor classification bucket!</p> 
+<p>Drag medications to classes. Once matched, click any green card to toggle its high-yield side effects!</p> 
 </header> 
 <div id="game-container"> 
 <div id="cards-pool"></div> 
 <div id="classes-container"> 
-<div class="class-bucket" data-class="Alpha1 Agonist"> 
-<h3>Alpha1 Agonists</h3> 
-</div> 
-<div class="class-bucket" data-class="Alpha1 Antagonist"> 
-<h3>Alpha1 ANTagonists</h3> 
-</div> 
-<div class="class-bucket" data-class="Alpha2 Agonist"> 
-<h3>Alpha2 Agonists</h3> 
-</div> 
-<div class="class-bucket" data-class="Alpha2 Antagonist"> 
-<h3>Alpha2 ANTagonists</h3> 
-</div> 
-<div class="class-bucket" data-class="Nonselective Alpha Agonist"> 
-<h3>Nonselective Alpha Agonists</h3> 
-</div> 
-<div class="class-bucket" data-class="Nonselective Alpha Antagonist"> 
-<h3>Nonselective Alpha ANTagonists</h3> 
-</div> 
-<div class="class-bucket" data-class="Beta 1 Agonist"> 
-<h3>Beta 1 Agonists</h3> 
-</div> 
+<div class="class-bucket" data-class="Alpha1 Agonist"><h3>Alpha1 Agonists</h3></div> 
+<div class="class-bucket" data-class="Alpha1 Antagonist"><h3>Alpha1 ANTagonists</h3></div> 
+<div class="class-bucket" data-class="Alpha2 Agonist"><h3>Alpha2 Agonists</h3></div> 
+<div class="class-bucket" data-class="Alpha2 Antagonist"><h3>Alpha2 ANTagonists</h3></div> 
+<div class="class-bucket" data-class="Nonselective Alpha Agonist"><h3>Nonselective Alpha Agonists</h3></div> 
+<div class="class-bucket" data-class="Nonselective Alpha Antagonist"><h3>Nonselective Alpha ANTagonists</h3></div> 
+<div class="class-bucket" data-class="Beta 1 Agonist"><h3>Beta 1 Agonists</h3></div> 
 </div> 
 </div> 
 <div id="footer-bar"> 
 <div id="score-board">Progress: <span id="score">0</span> / 19</div> 
-<!-- Built-in trigger to force actual Fullscreen Mode --> 
 <button class="fs-btn" onclick="toggleFullscreen()">Go Fullscreen</button> 
 </div> 
 <script> 
 const drugData = [ 
-// Sorted sequentially by indication order matching your original image chart layout!
-{ name: "Phenylephrine", class: "Alpha1 Agonist", sub: "Hypotension/Shock", order: 1 }, 
-{ name: "Midodrine", class: "Alpha1 Agonist", sub: "Orthostatic Hypotension", order: 2 }, 
-{ name: "Oxymetazoline", class: "Alpha1 Agonist", sub: "Nasal Congestion", order: 3 }, 
+// I added high-yield clinical side effects directly to your database profile items!
+{ name: "Phenylephrine", class: "Alpha1 Agonist", sub: "Hypotension/Shock", fx: "Reflex bradycardia, Hypertension, Anxiety", order: 1 }, 
+{ name: "Midodrine", class: "Alpha1 Agonist", sub: "Orthostatic Hypotension", fx: "Supine hypertension, Piloerection (goosebumps), Pruritus", order: 2 }, 
+{ name: "Oxymetazoline", class: "Alpha1 Agonist", sub: "Nasal Congestion", fx: "Rebound congestion (rhinitis medicamentosa) if used >3 days", order: 3 }, 
 
-{ name: "Tamsulosin", class: "Alpha1 Antagonist", sub: "BPH ONLY", order: 1 }, 
-{ name: "Prazosin", class: "Alpha1 Antagonist", sub: "PTSD Nightmares & BPH + HTN", order: 2 }, 
-{ name: "Terazosin", class: "Alpha1 Antagonist", sub: "BPH + HTN", order: 3 }, 
-{ name: "Doxazosin", class: "Alpha1 Antagonist", sub: "BPH + HTN", order: 4 }, 
+{ name: "Tamsulosin", class: "Alpha1 Antagonist", sub: "BPH ONLY", fx: "Floppy iris syndrome, Abnormal ejaculation, Mild dizziness", order: 1 }, 
+{ name: "Prazosin", class: "Alpha1 Antagonist", sub: "PTSD Nightmares & BPH + HTN", fx: "First-dose orthostatic hypotension, Syncope, Reflex tachycardia", order: 2 }, 
+{ name: "Terazosin", class: "Alpha1 Antagonist", sub: "BPH + HTN", fx: "Orthostatic hypotension, Dizziness, Peripheral edema", order: 3 }, 
+{ name: "Doxazosin", class: "Alpha1 Antagonist", sub: "BPH + HTN", fx: "Orthostatic hypotension, Fatigue, Headache", order: 4 }, 
 
-{ name: "Clonidine", class: "Alpha2 Agonist", sub: "HTN Urgency", order: 1 }, 
-{ name: "A-Methyldopa", class: "Alpha2 Agonist", sub: "HTN in Pregnancy", order: 2 }, 
-{ name: "Dexmedetomidine", class: "Alpha2 Agonist", sub: "Procedural Sedation", order: 3 }, 
-{ name: "Tizanidine", class: "Alpha2 Agonist", sub: "Muscle Spasms", order: 4 }, 
-{ name: "Guanfacine", class: "Alpha2 Agonist", sub: "ADHD", order: 5 }, 
+{ name: "Clonidine", class: "Alpha2 Agonist", sub: "HTN Urgency", fx: "Severe rebound hypertensive crisis if stopped abruptly, Dry mouth, Sedation", order: 1 }, 
+{ name: "A-Methyldopa", class: "Alpha2 Agonist", sub: "HTN in Pregnancy", fx: "Coombs-positive hemolytic anemia, Drug-induced lupus, Sedation", order: 2 }, 
+{ name: "Dexmedetomidine", class: "Alpha2 Agonist", sub: "Procedural Sedation", fx: "Bradycardia, Hypotension, Transient hypertension", order: 3 }, 
+{ name: "Tizanidine", class: "Alpha2 Agonist", sub: "Muscle Spasms", fx: "Hypotension, Somnolence, Xerostomia (dry mouth), Hepatotoxicity", order: 4 }, 
+{ name: "Guanfacine", class: "Alpha2 Agonist", sub: "ADHD", fx: "Sedation, Hypotension, Constipation", order: 5 }, 
 
-{ name: "Mirtazapine", class: "Alpha2 Antagonist", sub: "Depression", order: 1 }, 
-{ name: "Yohimbine", class: "Alpha2 Antagonist", sub: "ED", order: 2 }, 
+{ name: "Mirtazapine", class: "Alpha2 Antagonist", sub: "Depression", fx: "Sedation (potent H1 blocker), Weight gain/Increased appetite", order: 1 }, 
+{ name: "Yohimbine", class: "Alpha2 Antagonist", sub: "ED", fx: "Hypertension, Tachycardia, Anxiety, Tremor", order: 2 }, 
 
-{ name: "Norepinephrine", class: "Nonselective Alpha Agonist", sub: "No Subcategory Listed", order: 1 }, 
-{ name: "Epinephrine", class: "Nonselective Alpha Agonist", sub: "No Subcategory Listed", order: 2 }, 
+{ name: "Norepinephrine", class: "Nonselective Alpha Agonist", sub: "No Subcategory Listed", fx: "Severe tissue necrosis if extravasation occurs, Arrhythmias", order: 1 }, 
+{ name: "Epinephrine", class: "Nonselective Alpha Agonist", sub: "No Subcategory Listed", fx: "Cerebral hemorrhage from severe hypertension, Pulmonary edema, Ventricular fibrillation", order: 2 }, 
 
-{ name: "Phenoxybenzamine", class: "Nonselective Alpha Antagonist", sub: "*IRREVERSIBLE*(Pheochromocytoma Management)", order: 1 }, 
-{ name: "Phentolamine", class: "Nonselective Alpha Antagonist", sub: "*REVERSIBLE*(induced tissue ischemia & different induced HTN crises)", order: 2 }, 
+{ name: "Phenoxybenzamine", class: "Nonselective Alpha Antagonist", sub: "*IRREVERSIBLE*(Pheochromocytoma Management)", fx: "Profound orthostatic hypotension, Reflex tachycardia, Nasal congestion", order: 1 }, 
+{ name: "Phentolamine", class: "Nonselective Alpha Antagonist", sub: "*REVERSIBLE*(induced tissue ischemia & different induced HTN crises)", fx: "Severe hypotension, Arrhythmias, MI, GI stimulation (diarrhea)", order: 2 }, 
 
-{ name: "Dobutamine", class: "Beta 1 Agonist", sub: "*B1 > B2 > A1*(Acute Heart Failure/Cardiogenic Shock)", order: 1 } 
+{ name: "Dobutamine", class: "Beta 1 Agonist", sub: "*B1 > B2 > A1*(Acute Heart Failure/Cardiogenic Shock)", fx: "Tachycardia, Ventricular arrhythmias, Angina/Chest pain", order: 1 } 
 ]; 
+
 const cardsPool = document.getElementById('cards-pool'); 
 const buckets = document.querySelectorAll('.class-bucket'); 
 const scoreDisplay = document.getElementById('score'); 
@@ -108,6 +119,7 @@ card.draggable = true;
 card.innerText = drug.name; 
 card.setAttribute('data-class', drug.class); 
 card.setAttribute('data-sub', drug.sub); 
+card.setAttribute('data-fx', drug.fx); 
 card.setAttribute('data-order', drug.order); 
 card.addEventListener('dragstart', (e) => { 
 e.dataTransfer.setData('text/plain', e.target.id); 
@@ -153,29 +165,16 @@ const bucketClass = bucket.getAttribute('data-class');
 if (correctClass === bucketClass) { 
 bucket.appendChild(card); 
 card.draggable = false; 
-card.style.backgroundColor = '#2ecc71'; 
-card.style.cursor = 'default'; 
+card.classList.add('matched-card'); // Unlocks click functions
+card.style.cursor = 'pointer';
 
-// This line changes the text to include the indication right next to the drug name!
-card.innerText = card.innerText + " (" + card.getAttribute('data-sub') + ")";
+// Converts format to show the indication layout immediately upon matching
+card.innerText = card.getAttribute('id').split('-')[0] === 'drug' ? card.innerText + " (" + card.getAttribute('data-sub') + ")" : card.innerText;
 
-// Run the layout sorting rules
-sortBucketCards(bucket);
-
-matchedCount++; 
-scoreDisplay.innerText = matchedCount; 
-if(matchedCount === drugData.length) { 
-setTimeout(() => alert('Masterful job! You mastered all 19 autonomic system drugs!'), 300); 
-} 
-} else { 
-card.style.backgroundColor = '#e74c3c'; 
-setTimeout(() => { 
-card.style.backgroundColor = '#0984e3'; 
-}, 500); 
-} 
-}); 
-}); 
-initGame(); 
-</script> 
-</body> 
-</html>
+// Click-to-flip quiz rules mapping
+card.onclick = function() {
+    if(card.classList.contains('side-effects-revealed')) {
+        card.classList.remove('side-effects-revealed');
+        card.innerText = card.innerText.split('\n')[0]; // Revert text to standard view
+    } else {
+        card.classList.add('side-effects-revealed');
