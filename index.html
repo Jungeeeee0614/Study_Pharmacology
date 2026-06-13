@@ -57,7 +57,6 @@ p { color: #7f8c8d; margin: 0; font-size: 0.95rem; }
 </header> 
 <div id="game-container"> 
     
-    <!-- Cards are now safely hardcoded right here so they cannot fail to display -->
     <div id="cards-pool">
         <div class="drug-card" id="d1" draggable="true" data-class="Alpha1 Agonist" data-sub="Hypotension/Shock">Phenylephrine</div>
         <div class="drug-card" id="d2" draggable="true" data-class="Alpha1 Antagonist" data-sub="BPH ONLY">Tamsulosin</div>
@@ -131,8 +130,10 @@ const buckets = document.querySelectorAll('.class-bucket');
 const scoreDisplay = document.getElementById('score'); 
 let matchedCount = 0; 
 
+// Secure global pointer variable that handles matching completely bypassing dataTransfer
+let activeDraggedCard = null;
+
 function initGame() { 
-    // Grabs the physical HTML cards and shuffles them randomly right inside the container box
     const cards = Array.from(cardsPool.children);
     cards.sort(() => Math.random() - 0.5);
     cards.forEach(card => cardsPool.appendChild(card));
@@ -140,3 +141,4 @@ function initGame() {
 
 function toggleFullscreen() { 
 if (!document.fullscreenElement) { 
+document.documentElement.requestFullscreen().catch(err => { 
