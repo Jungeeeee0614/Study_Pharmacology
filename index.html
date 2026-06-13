@@ -14,8 +14,13 @@ p { color: #7f8c8d; margin: 0; font-size: 0.95rem; }
 /* The main container now stretches to fill remaining vertical space */ 
 #game-container { display: flex; flex-direction: column; flex-grow: 1; width: 100%; gap: 15px; min-height: 0; /* Critical for inner scroll mechanics */ } 
 #cards-pool { display: flex; flex-wrap: wrap; gap: 10px; padding: 15px; background: #ffffff; border: 2px dashed #b2bec3; border-radius: 8px; min-height: 80px; justify-content: center; align-items: center; flex-shrink: 0; } 
-.drug-card { background-color: #0984e3; color: white; padding: 10px 16px; border-radius: 20px; cursor: grab; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); user-select: none; transition: transform 0.2s; font-size: 0.95rem; margin: 4px 2px; display: inline-block; } 
+.drug-card { background-color: #0984e3; color: white; padding: 10px 16px; border-radius: 20px; cursor: grab; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); user-select: none; transition: transform 0.2s, background-color 0.3s; font-size: 0.95rem; margin: 4px 2px; display: inline-block; text-align: center; } 
 .drug-card:active { cursor: grabbing; transform: scale(1.05); } 
+
+/* Special states for matched interactive cards */
+.matched-card { cursor: pointer !important; }
+.showing-indication { background-color: #e67e22 !important; } /* Changes color to orange when showing indication */
+
 /* The buckets grid now automatically maximizes to fill the entire remaining screen layout */ 
 #classes-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; flex-grow: 1; min-height: 0; overflow-y: auto; /* Allows scrolling inside the game area if window is small */ padding-bottom: 10px; } 
 .class-bucket { background-color: #ffffff; border: 2px solid #dfe6e9; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: background 0.2s; min-height: 120px; } 
@@ -30,32 +35,18 @@ p { color: #7f8c8d; margin: 0; font-size: 0.95rem; }
 <body> 
 <header> 
 <h1>Autonomic Pharmacology Sorting Game</h1> 
-<p>Drag each medication card into its correct receptor classification bucket! Correct drops reveal their unique indication.</p> 
+<p>Drag each medication card into its correct bucket. Once dropped, click any green card to toggle its indication!</p> 
 </header> 
 <div id="game-container"> 
 <div id="cards-pool"></div> 
 <div id="classes-container"> 
-<div class="class-bucket" data-class="Alpha1 Agonist"> 
-<h3>Alpha1 Agonists</h3> 
-</div> 
-<div class="class-bucket" data-class="Alpha1 Antagonist"> 
-<h3>Alpha1 ANTagonists</h3> 
-</div> 
-<div class="class-bucket" data-class="Alpha2 Agonist"> 
-<h3>Alpha2 Agonists</h3> 
-</div> 
-<div class="class-bucket" data-class="Alpha2 Antagonist"> 
-<h3>Alpha2 ANTagonists</h3> 
-</div> 
-<div class="class-bucket" data-class="Nonselective Alpha Agonist"> 
-<h3>Nonselective Alpha Agonists</h3> 
-</div> 
-<div class="class-bucket" data-class="Nonselective Alpha Antagonist"> 
-<h3>Nonselective Alpha ANTagonists</h3> 
-</div> 
-<div class="class-bucket" data-class="Beta 1 Agonist"> 
-<h3>Beta 1 Agonists</h3> 
-</div> 
+<div class="class-bucket" data-class="Alpha1 Agonist"><h3>Alpha1 Agonists</h3></div> 
+<div class="class-bucket" data-class="Alpha1 Antagonist"><h3>Alpha1 ANTagonists</h3></div> 
+<div class="class-bucket" data-class="Alpha2 Agonist"><h3>Alpha2 Agonists</h3></div> 
+<div class="class-bucket" data-class="Alpha2 Antagonist"><h3>Alpha2 ANTagonists</h3></div> 
+<div class="class-bucket" data-class="Nonselective Alpha Agonist"><h3>Nonselective Alpha Agonists</h3></div> 
+<div class="class-bucket" data-class="Nonselective Alpha Antagonist"><h3>Nonselective Alpha ANTagonists</h3></div> 
+<div class="class-bucket" data-class="Beta 1 Agonist"><h3>Beta 1 Agonists</h3></div> 
 </div> 
 </div> 
 <div id="footer-bar"> 
@@ -99,6 +90,7 @@ card.className = 'drug-card';
 card.id = `drug-${index}`; 
 card.draggable = true; 
 card.innerText = drug.name; 
+card.setAttribute('data-name', drug.name); 
 card.setAttribute('data-class', drug.class); 
 card.setAttribute('data-sub', drug.sub); 
 card.setAttribute('data-order', drug.order); 
@@ -147,17 +139,25 @@ if (correctClass === bucketClass) {
 bucket.appendChild(card); 
 card.draggable = false; 
 card.style.backgroundColor = '#2ecc71'; 
-card.style.cursor = 'default'; 
+card.classList.add('matched-card'); 
 
-// This single line below attaches the indication to the text layout when dropped!
-card.innerText = card.innerText + " \n(" + card.getAttribute('data-sub') + ")";
+// The click action toggles between showing the name and indication
+card.onclick = function() {
+    if (card.classList.contains('showing-indication')) {
+        card.classList.remove('showing-indication');
+        card.innerText = card.getAttribute('data-name');
+    } else {
+        card.classList.add('showing-indication');
+        card.innerText = card.getAttribute('data-sub');
+    }
+};
 
 sortBucketCards(bucket);
 
 matchedCount++; 
 scoreDisplay.innerText = matchedCount; 
 if(matchedCount === drugData.length) { 
-setTimeout(() => alert('Masterful job! You mastered all 19 autonomic system drugs and indications!'), 300); 
+setTimeout(() => alert('Masterful job! You mastered all 19 autonomic system drugs! Click green cards to study indications.'), 300); 
 } 
 } else { 
 card.style.backgroundColor = '#e74c3c'; 
