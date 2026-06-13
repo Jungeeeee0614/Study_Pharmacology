@@ -14,7 +14,7 @@ p { color: #7f8c8d; margin: 0; font-size: 0.95rem; }
 
 #game-container { display: flex; flex-direction: column; flex-grow: 1; width: 100%; gap: 15px; min-height: 0; } 
 #cards-pool { display: flex; flex-wrap: wrap; gap: 10px; padding: 15px; background: #ffffff; border: 2px dashed #b2bec3; border-radius: 8px; min-height: 80px; justify-content: center; align-items: center; flex-shrink: 0; } 
-.drug-card { background-color: #0984e3; color: white; padding: 10px 16px; border-radius: 20px; cursor: grab; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); user-select: none; transition: transform 0.2s, background-color 0.3s; font-size: 0.95rem; margin: 4px 2px; display: inline-block; text-align: center; } 
+.drug-card { background-color: #0984e3; color: white; padding: 10px 16px; border-radius: 20px; cursor: grab; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); user-select: none; -webkit-user-select: none; font-size: 0.95rem; margin: 4px 2px; display: inline-block; text-align: center; } 
 .drug-card:active { cursor: grabbing; transform: scale(1.05); } 
 
 /* Special color tags for each distinct flashcard study state */
@@ -25,7 +25,7 @@ p { color: #7f8c8d; margin: 0; font-size: 0.95rem; }
 #classes-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; flex-grow: 1; min-height: 0; overflow-y: auto; padding-bottom: 10px; } 
 .class-bucket { background-color: #ffffff; border: 2px solid #dfe6e9; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: background 0.2s; min-height: 120px; } 
 .class-bucket h3 { margin: 0 0 5px 0; text-align: center; color: #2d3436; border-bottom: 2px solid #00b894; padding-bottom: 5px; font-size: 0.95rem; } 
-.drag-over { background-color: #e8f8f5; border-color: #00b894; } 
+.drag-over { background-color: #e8f8f5 !important; border-color: #00b894 !important; } 
 #footer-bar { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid #dcdde1; margin-top: auto; flex-shrink: 0; } 
 #score-board { font-size: 1.2rem; font-weight: bold; color: #27ae60; } 
 .fs-btn { background-color: #7f8c8d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; } 
@@ -80,7 +80,9 @@ const cardsPool = document.getElementById('cards-pool');
 const buckets = document.querySelectorAll('.class-bucket'); 
 const scoreDisplay = document.getElementById('score'); 
 let matchedCount = 0; 
-let activeDraggedCard = null;
+
+// Secure background state tracking variable (Bypasses dataTransfer bugs)
+let currentlyDraggedCard = null;
 
 function initGame() { 
     const cards = Array.from(cardsPool.children);
@@ -101,9 +103,11 @@ document.exitFullscreen();
 } 
 } 
 
+// Hook up event handlers to local variables safely
 document.querySelectorAll('.drug-card').forEach(card => {
-    card.addEventListener('dragstart', () => { 
-        activeDraggedCard = card; 
+    card.addEventListener('dragstart', (e) => { 
+        currentlyDraggedCard = card;
+        e.dataTransfer.setData('text/plain', card.id); // Fallback for older browsers
     }); 
 });
 
@@ -119,7 +123,8 @@ bucket.addEventListener('drop', (e) => {
 e.preventDefault(); 
 bucket.classList.remove('drag-over'); 
 
-const card = activeDraggedCard;
+// Grab the card reference straight from our local variable instead of standard drop data
+const card = currentlyDraggedCard;
 if (!card) return; 
 
 const correctClass = card.getAttribute('data-class'); 
@@ -131,11 +136,6 @@ if (correctClass === bucketClass) {
     card.style.backgroundColor = '#2ecc71'; 
     card.classList.add('matched-card'); 
 
-    // Triple state rotation study loop (Name -> Indication -> Side Effect)
+    // Triple rotation click selector engine
     card.onclick = function() {
         if (!card.classList.contains('state-indication') && !card.classList.contains('state-effects')) {
-            // First Click: Shift to Indication View
-            card.classList.add('state-indication');
-            card.innerText = card.getAttribute('data-sub');
-        } else if (card.classList.contains('state-indication')) {
-            // Second Click: Shift to Side Effects View
