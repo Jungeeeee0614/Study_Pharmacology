@@ -5,215 +5,169 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
 <title>Autonomic Drug Sorting Game</title> 
 <style> 
-body { 
-    margin: 0;
-    padding: 20px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-    background-color: #f0f3f4; 
-} 
-header { 
-    text-align: center; 
-    margin-bottom: 20px; 
-} 
+/* Forces the webpage to take up 100% of the browser window size */ 
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f3f4; overflow-x: hidden; /* Prevents awkward side-scrolling */ } 
+body { display: flex; flex-direction: column; padding: 15px; } 
+header { text-align: center; margin-bottom: 15px; flex-shrink: 0; /* Keeps header from shrinking */ } 
 h1 { color: #2c3e50; margin: 0 0 5px 0; font-size: 1.8rem; } 
 p { color: #7f8c8d; margin: 0; font-size: 0.95rem; } 
-
-#game-container { 
-    display: flex; 
-    flex-direction: column; 
-    width: 100%; 
-    gap: 15px; 
-} 
-#cards-pool { 
-    display: flex; 
-    flex-wrap: wrap; 
-    gap: 10px; 
-    padding: 15px; 
-    background: #ffffff; 
-    border: 2px dashed #b2bec3; 
-    border-radius: 8px; 
-    min-height: 80px; 
-    justify-content: center; 
-    align-items: center; 
-} 
-.drug-card { 
-    background-color: #0984e3; 
-    color: white; 
-    padding: 10px 16px; 
-    border-radius: 20px; 
-    cursor: grab; 
-    font-weight: bold; 
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
-    user-select: none; 
-    transition: transform 0.2s, background-color 0.3s; 
-    font-size: 0.95rem; 
-    margin: 4px 2px; 
-    display: inline-block; 
-    text-align: center; 
-    line-height: 1.4; 
-} 
+/* The main container now stretches to fill remaining vertical space */ 
+#game-container { display: flex; flex-direction: column; flex-grow: 1; width: 100%; gap: 15px; min-height: 0; /* Critical for inner scroll mechanics */ } 
+#cards-pool { display: flex; flex-wrap: wrap; gap: 10px; padding: 15px; background: #ffffff; border: 2px dashed #b2bec3; border-radius: 8px; min-height: 80px; justify-content: center; align-items: center; flex-shrink: 0; } 
+.drug-card { background-color: #0984e3; color: white; padding: 10px 16px; border-radius: 20px; cursor: grab; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); user-select: none; transition: transform 0.2s, background-color 0.3s; font-size: 0.95rem; margin: 4px 2px; display: inline-block; text-align: center; } 
 .drug-card:active { cursor: grabbing; transform: scale(1.05); } 
 
-/* Special states for matched interactive cards */ 
-.matched-card { cursor: pointer !important; } 
-.showing-indication { background-color: #e67e22 !important; } 
-.showing-effects { background-color: #9b59b6 !important; } 
+/* Special states for matched interactive cards */
+.matched-card { cursor: pointer !important; }
+.showing-indication { background-color: #e67e22 !important; } /* Changes color to orange when showing indication */
 
-#classes-container { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-    gap: 15px; 
-    margin-top: 5px;
-} 
-.class-bucket { 
-    background-color: #ffffff; 
-    border: 2px solid #dfe6e9; 
-    border-radius: 8px; 
-    padding: 12px; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 10px; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-    transition: background 0.2s; 
-    min-height: 120px; 
-} 
-.class-bucket h3 { 
-    margin: 0 0 5px 0; 
-    text-align: center; 
-    color: #2d3436; 
-    border-bottom: 2px solid #00b894; 
-    padding-bottom: 5px; 
-    font-size: 0.95rem; 
-} 
+/* The buckets grid now automatically maximizes to fill the entire remaining screen layout */ 
+#classes-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; flex-grow: 1; min-height: 0; overflow-y: auto; /* Allows scrolling inside the game area if window is small */ padding-bottom: 10px; } 
+.class-bucket { background-color: #ffffff; border: 2px solid #dfe6e9; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: background 0.2s; min-height: 120px; } 
+.class-bucket h3 { margin: 0 0 5px 0; text-align: center; color: #2d3436; border-bottom: 2px solid #00b894; padding-bottom: 5px; font-size: 0.95rem; } 
 .drag-over { background-color: #e8f8f5; border-color: #00b894; } 
-
-#footer-bar { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    padding-top: 15px; 
-    border-top: 1px solid #dcdde1; 
-    margin-top: 25px; 
-} 
-#score-board { 
-    font-size: 1.2rem; 
-    font-weight: bold; 
-    color: #27ae60; 
-} 
-.fs-btn { 
-    background-color: #7f8c8d; 
-    color: white; 
-    border: none; 
-    padding: 6px 12px; 
-    border-radius: 4px; 
-    cursor: pointer; 
-    font-size: 0.85rem; 
-} 
+#footer-bar { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid #dcdde1; margin-top: auto; flex-shrink: 0; } 
+#score-board { font-size: 1.2rem; font-weight: bold; color: #27ae60; } 
+.fs-btn { background-color: #7f8c8d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; } 
 .fs-btn:hover { background-color: #2c3e50; } 
 </style> 
 </head> 
 <body> 
 <header> 
- <h1>Autonomic Pharmacology Sorting Game</h1> 
- <p>Drag each medication card into its correct bucket. Once dropped, click any green card to rotate through **Indication** ➔ **Side Effects** ➔ **Name**!</p> 
+<h1>Autonomic Pharmacology Sorting Game</h1> 
+<p>Drag each medication card into its correct bucket. Once dropped, click any green card to toggle its indication!</p> 
 </header> 
 <div id="game-container"> 
- <div id="cards-pool"></div> 
- <div id="classes-container"> 
- <div class="class-bucket" data-class="Alpha1 Agonist"><h3>Alpha1 Agonists</h3></div> 
- <div class="class-bucket" data-class="Alpha1 Antagonist"><h3>Alpha1 ANTagonists</h3></div> 
- <div class="class-bucket" data-class="Alpha2 Agonist"><h3>Alpha2 Agonists</h3></div> 
- <div class="class-bucket" data-class="Alpha2 Antagonist"><h3>Alpha2 ANTagonists</h3></div> 
- <div class="class-bucket" data-class="Nonselective Alpha Agonist"><h3>Nonselective Alpha Agonists</h3></div> 
- <div class="class-bucket" data-class="Nonselective Alpha Antagonist"><h3>Nonselective Alpha ANTagonists</h3></div> 
- <div class="class-bucket" data-class="Beta 1 Agonist"><h3>Beta 1 Agonists</h3></div> 
- </div> 
+<div id="cards-pool"></div> 
+<div id="classes-container"> 
+<div class="class-bucket" data-class="Alpha1 Agonist"><h3>Alpha1 Agonists</h3></div> 
+<div class="class-bucket" data-class="Alpha1 Antagonist"><h3>Alpha1 ANTagonists</h3></div> 
+<div class="class-bucket" data-class="Alpha2 Agonist"><h3>Alpha2 Agonists</h3></div> 
+<div class="class-bucket" data-class="Alpha2 Antagonist"><h3>Alpha2 ANTagonists</h3></div> 
+<div class="class-bucket" data-class="Nonselective Alpha Agonist"><h3>Nonselective Alpha Agonists</h3></div> 
+<div class="class-bucket" data-class="Nonselective Alpha Antagonist"><h3>Nonselective Alpha ANTagonists</h3></div> 
+<div class="class-bucket" data-class="Beta 1 Agonist"><h3>Beta 1 Agonists</h3></div> 
+</div> 
 </div> 
 <div id="footer-bar"> 
- <div id="score-board">Progress: <span id="score">0</span> / 19</div> 
- <button class="fs-btn" onclick="toggleFullscreen()">Go Fullscreen</button> 
+<div id="score-board">Progress: <span id="score">0</span> / 19</div> 
+<!-- Built-in trigger to force actual Fullscreen Mode --> 
+<button class="fs-btn" onclick="toggleFullscreen()">Go Fullscreen</button> 
 </div> 
 <script> 
 const drugData = [ 
- { name: "Phenylephrine", class: "Alpha1 Agonist", sub: "Hypotension/Shock", fx: "Reflex bradycardia, Hypertension, Anxiety", order: 1 }, 
- { name: "Midodrine", class: "Alpha1 Agonist", sub: "Orthostatic Hypotension", fx: "Supine hypertension, Goosebumps, Pruritus", order: 2 }, 
- { name: "Oxymetazoline", class: "Alpha1 Agonist", sub: "Nasal Congestion", fx: "Rebound congestion if used >3 days", order: 3 }, 
- { name: "Tamsulosin", class: "Alpha1 Antagonist", sub: "BPH ONLY", fx: "Floppy iris syndrome, Abnormal ejaculation, Mild dizziness", order: 1 }, 
- { name: "Prazosin", class: "Alpha1 Antagonist", sub: "PTSD Nightmares & BPH + HTN", fx: "First-dose orthostatic hypotension, Syncope, Reflex tachycardia", order: 2 }, 
- { name: "Terazosin", class: "Alpha1 Antagonist", sub: "BPH + HTN", fx: "Orthostatic hypotension, Dizziness, Peripheral edema", order: 3 }, 
- { name: "Doxazosin", class: "Alpha1 Antagonist", sub: "BPH + HTN", fx: "Orthostatic hypotension, Fatigue, Headache", order: 4 }, 
- { name: "Clonidine", class: "Alpha2 Agonist", sub: "HTN Urgency", fx: "Severe rebound hypertensive crisis if stopped abruptly, Dry mouth, Sedation", order: 1 }, 
- { name: "A-Methyldopa", class: "Alpha2 Agonist", sub: "HTN in Pregnancy", fx: "Coombs-positive hemolytic anemia, Drug-induced lupus, Sedation", order: 2 }, 
- { name: "Dexmedetomidine", class: "Alpha2 Agonist", sub: "Procedural Sedation", fx: "Bradycardia, Hypotension, Transient hypertension", order: 3 }, 
- { name: "Tizanidine", class: "Alpha2 Agonist", sub: "Muscle Spasms", fx: "Hypotension, Somnolence, Dry mouth, Hepatotoxicity", order: 4 }, 
- { name: "Guanfacine", class: "Alpha2 Agonist", sub: "ADHD", fx: "Sedation, Hypotension, Constipation", order: 5 }, 
- { name: "Mirtazapine", class: "Alpha2 Antagonist", sub: "Depression", fx: "Sedation, Weight gain/Increased appetite", order: 1 }, 
- { name: "Yohimbine", class: "Alpha2 Antagonist", sub: "ED", fx: "Hypertension, Tachycardia, Anxiety, Tremor", order: 2 }, 
- { name: "Norepinephrine", class: "Nonselective Alpha Agonist", sub: "No Subcategory Listed", fx: "Severe tissue necrosis if extravasation occurs, Arrhythmias", order: 1 }, 
- { name: "Epinephrine", class: "Nonselective Alpha Agonist", sub: "No Subcategory Listed", fx: "Cerebral hemorrhage from severe hypertension, Pulmonary edema, V-Fib", order: 2 }, 
- { name: "Phenoxybenzamine", class: "Nonselective Alpha Antagonist", sub: "*IRREVERSIBLE* (Pheochromocytoma)", fx: "Profound orthostatic hypotension, Reflex tachycardia, Nasal congestion", order: 1 }, 
- { name: "Phentolamine", class: "Nonselective Alpha Antagonist", sub: "*REVERSIBLE* (Ischemia/HTN Crises)", fx: "Severe hypotension, Arrhythmias, MI, GI stimulation", order: 2 }, 
- { name: "Dobutamine", class: "Beta 1 Agonist", sub: "*B1 > B2 > A1* (Acute Heart Failure)", fx: "Tachycardia, Ventricular arrhythmias, Angina", order: 1 } 
+{ name: "Phenylephrine", class: "Alpha1 Agonist", sub: "Hypotension/Shock", order: 1 }, 
+{ name: "Midodrine", class: "Alpha1 Agonist", sub: "Orthostatic Hypotension", order: 2 }, 
+{ name: "Oxymetazoline", class: "Alpha1 Agonist", sub: "Nasal Congestion", order: 3 }, 
+{ name: "Tamsulosin", class: "Alpha1 Antagonist", sub: "BPH ONLY", order: 1 }, 
+{ name: "Prazosin", class: "Alpha1 Antagonist", sub: "PTSD Nightmares & BPH + HTN", order: 2 }, 
+{ name: "Terazosin", class: "Alpha1 Antagonist", sub: "BPH + HTN", order: 3 }, 
+{ name: "Doxazosin", class: "Alpha1 Antagonist", sub: "BPH + HTN", order: 4 }, 
+{ name: "Clonidine", class: "Alpha2 Agonist", sub: "HTN Urgency", order: 1 }, 
+{ name: "A-Methyldopa", class: "Alpha2 Agonist", sub: "HTN in Pregnancy", order: 2 }, 
+{ name: "Dexmedetomidine", class: "Alpha2 Agonist", sub: "Procedural Sedation", order: 3 }, 
+{ name: "Tizanidine", class: "Alpha2 Agonist", sub: "Muscle Spasms", order: 4 }, 
+{ name: "Guanfacine", class: "Alpha2 Agonist", sub: "ADHD", order: 5 }, 
+{ name: "Mirtazapine", class: "Alpha2 Antagonist", sub: "Depression", order: 1 }, 
+{ name: "Yohimbine", class: "Alpha2 Antagonist", sub: "ED", order: 2 }, 
+{ name: "Norepinephrine", class: "Nonselective Alpha Agonist", sub: "No Subcategory Listed", order: 1 }, 
+{ name: "Epinephrine", class: "Nonselective Alpha Agonist", sub: "No Subcategory Listed", order: 2 }, 
+{ name: "Phenoxybenzamine", class: "Nonselective Alpha Antagonist", sub: "*IRREVERSIBLE* (Pheochromocytoma)", order: 1 }, 
+{ name: "Phentolamine", class: "Nonselective Alpha Antagonist", sub: "*REVERSIBLE* (Ischemia/HTN Crises)", order: 2 }, 
+{ name: "Dobutamine", class: "Beta 1 Agonist", sub: "*B1 > B2 > A1* (Acute Heart Failure)", order: 1 } 
 ]; 
 const cardsPool = document.getElementById('cards-pool'); 
 const buckets = document.querySelectorAll('.class-bucket'); 
 const scoreDisplay = document.getElementById('score'); 
 let matchedCount = 0; 
-let activeCardInstance = null; 
+
 function initGame() { 
- cardsPool.innerHTML = ''; 
- const shuffled = [...drugData].sort(() => Math.random() - 0.5); 
- shuffled.forEach((drug, index) => { 
- const card = document.createElement('div'); 
- card.className = 'drug-card'; 
- card.id = `drug-${index}`; 
- card.draggable = true; 
- card.innerText = drug.name; 
- card.setAttribute('data-name', drug.name); 
- card.setAttribute('data-class', drug.class); 
- card.setAttribute('data-sub', drug.sub); 
- card.setAttribute('data-fx', drug.fx); 
- card.setAttribute('data-order', drug.order); 
- card.addEventListener('dragstart', (e) => { 
- activeCardInstance = card; 
- e.dataTransfer.setData('text/plain', e.target.id); 
- }); 
- cardsPool.appendChild(card); 
- }); 
+const shuffled = [...drugData].sort(() => Math.random() - 0.5); 
+
+shuffled.forEach((drug, index) => { 
+const card = document.createElement('div'); 
+card.className = 'drug-card'; 
+card.id = `drug-${index}`; 
+card.draggable = true; 
+card.innerText = drug.name; 
+card.setAttribute('data-name', drug.name); 
+card.setAttribute('data-class', drug.class); 
+card.setAttribute('data-sub', drug.sub); 
+card.setAttribute('data-order', drug.order); 
+card.addEventListener('dragstart', (e) => { 
+e.dataTransfer.setData('text/plain', e.target.id); 
+}); 
+cardsPool.appendChild(card); 
+}); 
 } 
+
 function toggleFullscreen() { 
- if (!document.fullscreenElement) { 
- document.documentElement.requestFullscreen().catch(err => { 
- alert(`Error attempting to enable fullscreen mode: ${err.message}`); 
- }); 
- } else { 
- document.exitFullscreen(); 
+if (!document.fullscreenElement) { 
+document.documentElement.requestFullscreen().catch(err => { 
+alert(`Error attempting to enable fullscreen mode: ${err.message}`); 
+}); 
+} else { 
+document.exitFullscreen(); 
 } 
 } 
-function sortBucketCards(bucket) { 
- const elements = Array.from(bucket.querySelectorAll('.drug-card')); 
- elements.sort((a, b) => { return parseInt(a.getAttribute('data-order')) - parseInt(b.getAttribute('data-order')); }); 
- elements.forEach(el => bucket.appendChild(el)); 
-} 
+
+function sortBucketCards(bucket) {
+const elements = Array.from(bucket.querySelectorAll('.drug-card'));
+elements.sort((a, b) => {
+return parseInt(a.getAttribute('data-order')) - parseInt(b.getAttribute('data-order'));
+});
+elements.forEach(el => bucket.appendChild(el));
+}
+
 buckets.forEach(bucket => { 
- bucket.addEventListener('dragover', (e) => { e.preventDefault(); bucket.classList.add('drag-over'); }); 
- bucket.addEventListener('dragleave', () => { bucket.classList.remove('drag-over'); }); 
- bucket.addEventListener('drop', (e) => { 
- e.preventDefault(); bucket.classList.remove('drag-over'); 
- const card = activeCardInstance; 
- if (!card) return; 
- const correctClass = card.getAttribute('data-class'); 
- const bucketClass = bucket.getAttribute('data-class'); 
- if (correctClass === bucketClass) { 
- bucket.appendChild(card); card.draggable = false; card.style.backgroundColor = '#2ecc71'; card.classList.add('matched-card'); 
- card.onclick = function() { 
- if (!card.classList.contains('showing-indication') && !card.classList.contains('showing-effects')) { 
- card.classList.add('showing-indication'); card.innerText = card.getAttribute('data-sub'); 
- } else if (card.classList.contains('showing-indication')) { 
- card.classList.remove('showing-indication'); card.classList.add('showing-effects'); card.innerText = "⚠️ FX: " + card.getAttribute('data-fx'); 
- } else if (card.classList.contains('showing-effects')) { 
- card.classList.remove('showing-effects'); card.innerText = card.getAttribute('data-name'); 
- } 
- }; 
- sortBucketCards(bucket); matchedCount++; scoreDisplay.innerText = matchedCount; activeCardInstance = null; 
- if(matchedCount === drugData.length) { setTimeout(() => alert('Masterful job! You mastered all 19 autonomic system drugs! Click green cards to study indications and adverse effects.'), 300); } 
+bucket.addEventListener('dragover', (e) => { 
+e.preventDefault(); 
+bucket.classList.add('drag-over'); 
+}); 
+bucket.addEventListener('dragleave', () => { 
+bucket.classList.remove('drag-over'); 
+}); 
+bucket.addEventListener('drop', (e) => { 
+e.preventDefault(); 
+bucket.classList.remove('drag-over'); 
+const cardId = e.dataTransfer.getData('text/plain'); 
+const card = document.getElementById(cardId); 
+if (!card) return; 
+const correctClass = card.getAttribute('data-class'); 
+const bucketClass = bucket.getAttribute('data-class'); 
+if (correctClass === bucketClass) { 
+bucket.appendChild(card); 
+card.draggable = false; 
+card.style.backgroundColor = '#2ecc71'; 
+card.classList.add('matched-card'); 
+
+// The click action toggles between showing the name and indication
+card.onclick = function() {
+    if (card.classList.contains('showing-indication')) {
+        card.classList.remove('showing-indication');
+        card.innerText = card.getAttribute('data-name');
+    } else {
+        card.classList.add('showing-indication');
+        card.innerText = card.getAttribute('data-sub');
+    }
+};
+
+sortBucketCards(bucket);
+
+matchedCount++; 
+scoreDisplay.innerText = matchedCount; 
+if(matchedCount === drugData.length) { 
+setTimeout(() => alert('Masterful job! You mastered all 19 autonomic system drugs! Click green cards to study indications.'), 300); 
+} 
+} else { 
+card.style.backgroundColor = '#e74c3c'; 
+setTimeout(() => { 
+card.style.backgroundColor = '#0984e3'; 
+}, 500); 
+} 
+}); 
+}); 
+initGame(); 
+</script> 
+</body> 
+</html>
