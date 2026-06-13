@@ -56,9 +56,31 @@ p { color: #7f8c8d; margin: 0; font-size: 0.95rem; }
 <p>Drag each medication card into its correct receptor classification bucket! Cards automatically route into their specific subcategory line.</p> 
 </header> 
 <div id="game-container"> 
-<div id="cards-pool"></div> 
+    
+    <!-- Cards are now safely hardcoded right here so they cannot fail to display -->
+    <div id="cards-pool">
+        <div class="drug-card" id="d1" draggable="true" data-class="Alpha1 Agonist" data-sub="Hypotension/Shock">Phenylephrine</div>
+        <div class="drug-card" id="d2" draggable="true" data-class="Alpha1 Antagonist" data-sub="BPH ONLY">Tamsulosin</div>
+        <div class="drug-card" id="d3" draggable="true" data-class="Alpha2 Agonist" data-sub="HTN Urgency">Clonidine</div>
+        <div class="drug-card" id="d4" draggable="true" data-class="Alpha2 Antagonist" data-sub="Depression">Mirtazapine</div>
+        <div class="drug-card" id="d5" draggable="true" data-class="Nonselective Alpha Agonist" data-sub="No Subcategory Listed">Norepinephrine</div>
+        <div class="drug-card" id="d6" draggable="true" data-class="Nonselective Alpha Antagonist" data-sub="*IRREVERSIBLE* (Pheochromocytoma)">Phenoxybenzamine</div>
+        <div class="drug-card" id="d7" draggable="true" data-class="Beta 1 Agonist" data-sub="*B1 > B2 > A1* (Acute Heart Failure)">Dobutamine</div>
+        <div class="drug-card" id="d8" draggable="true" data-class="Alpha1 Agonist" data-sub="Orthostatic Hypotension">Midodrine</div>
+        <div class="drug-card" id="d9" draggable="true" data-class="Alpha1 Antagonist" data-sub="PTSD Nightmares & BPH + HTN">Prazosin</div>
+        <div class="drug-card" id="d10" draggable="true" data-class="Alpha2 Agonist" data-sub="HTN in Pregnancy">A-Methyldopa</div>
+        <div class="drug-card" id="d11" draggable="true" data-class="Alpha2 Antagonist" data-sub="ED">Yohimbine</div>
+        <div class="drug-card" id="d12" draggable="true" data-class="Nonselective Alpha Agonist" data-sub="No Subcategory Listed">Epinephrine</div>
+        <div class="drug-card" id="d13" draggable="true" data-class="Nonselective Alpha Antagonist" data-sub="*REVERSIBLE* (Ischemia/HTN Crises)">Phentolamine</div>
+        <div class="drug-card" id="d14" draggable="true" data-class="Alpha1 Agonist" data-sub="Nasal Congestion">Oxymetazoline</div>
+        <div class="drug-card" id="d15" draggable="true" data-class="Alpha1 Antagonist" data-sub="BPH + HTN">Terazosin</div>
+        <div class="drug-card" id="d16" draggable="true" data-class="Alpha2 Agonist" data-sub="Procedural Sedation">Dexmedetomidine</div>
+        <div class="drug-card" id="d17" draggable="true" data-class="Alpha1 Antagonist" data-sub="BPH + HTN">Doxazosin</div>
+        <div class="drug-card" id="d18" draggable="true" data-class="Alpha2 Agonist" data-sub="Muscle Spasms">Tizanidine</div>
+        <div class="drug-card" id="d19" draggable="true" data-class="Alpha2 Agonist" data-sub="ADHD">Guanfacine</div>
+    </div> 
+
 <div id="classes-container"> 
-    <!-- Buckets built with custom internal placeholder target zones -->
     <div class="class-bucket" data-class="Alpha1 Agonist">
         <h3>Alpha1 Agonists</h3>
         <div class="sub-row"><div class="sub-title">Hypotension/Shock</div><div class="sub-card-holder" data-sub="Hypotension/Shock"></div></div>
@@ -104,74 +126,17 @@ p { color: #7f8c8d; margin: 0; font-size: 0.95rem; }
 <button class="fs-btn" onclick="toggleFullscreen()">Go Fullscreen</button> 
 </div> 
 <script> 
-const drugData = [ 
-{ name: "Phenylephrine", class: "Alpha1 Agonist", sub: "Hypotension/Shock" }, 
-{ name: "Midodrine", class: "Alpha1 Agonist", sub: "Orthostatic Hypotension" }, 
-{ name: "Oxymetazoline", class: "Alpha1 Agonist", sub: "Nasal Congestion" }, 
-{ name: "Tamsulosin", class: "Alpha1 Antagonist", sub: "BPH ONLY" }, 
-{ name: "Prazosin", class: "Alpha1 Antagonist", sub: "PTSD Nightmares & BPH + HTN" }, 
-{ name: "Terazosin", class: "Alpha1 Antagonist", sub: "BPH + HTN" }, 
-{ name: "Doxazosin", class: "Alpha1 Antagonist", sub: "BPH + HTN" }, 
-{ name: "Clonidine", class: "Alpha2 Agonist", sub: "HTN Urgency" }, 
-{ name: "A-Methyldopa", class: "Alpha2 Agonist", sub: "HTN in Pregnancy" }, 
-{ name: "Dexmedetomidine", class: "Alpha2 Agonist", sub: "Procedural Sedation" }, 
-{ name: "Tizanidine", class: "Alpha2 Agonist", sub: "Muscle Spasms" }, 
-{ name: "Guanfacine", class: "Alpha2 Agonist", sub: "ADHD" }, 
-{ name: "Mirtazapine", class: "Alpha2 Antagonist", sub: "Depression" }, 
-{ name: "Yohimbine", class: "Alpha2 Antagonist", sub: "ED" }, 
-{ name: "Norepinephrine", class: "Nonselective Alpha Agonist", sub: "No Subcategory Listed" }, 
-{ name: "Epinephrine", class: "Nonselective Alpha Agonist", sub: "No Subcategory Listed" }, 
-{ name: "Phenoxybenzamine", class: "Nonselective Alpha Antagonist", sub: "*IRREVERSIBLE* (Pheochromocytoma)" }, 
-{ name: "Phentolamine", class: "Nonselective Alpha Antagonist", sub: "*REVERSIBLE* (Ischemia/HTN Crises)" }, 
-{ name: "Dobutamine", class: "Beta 1 Agonist", sub: "*B1 > B2 > A1* (Acute Heart Failure)" } 
-]; 
 const cardsPool = document.getElementById('cards-pool'); 
 const buckets = document.querySelectorAll('.class-bucket'); 
 const scoreDisplay = document.getElementById('score'); 
 let matchedCount = 0; 
 
 function initGame() { 
-const shuffled = [...drugData].sort(() => Math.random() - 0.5); 
-
-shuffled.forEach((drug, index) => { 
-const card = document.createElement('div'); 
-card.className = 'drug-card'; 
-card.id = `drug-${index}`; 
-card.draggable = true; 
-card.innerText = drug.name; 
-card.setAttribute('data-class', drug.class); 
-card.setAttribute('data-sub', drug.sub); 
-card.addEventListener('dragstart', (e) => { 
-e.dataTransfer.setData('text/plain', e.target.id); 
-}); 
-cardsPool.appendChild(card); 
-}); 
+    // Grabs the physical HTML cards and shuffles them randomly right inside the container box
+    const cards = Array.from(cardsPool.children);
+    cards.sort(() => Math.random() - 0.5);
+    cards.forEach(card => cardsPool.appendChild(card));
 } 
 
 function toggleFullscreen() { 
 if (!document.fullscreenElement) { 
-document.documentElement.requestFullscreen().catch(err => { 
-alert(`Error attempting to enable fullscreen mode: ${err.message}`); 
-}); 
-} else { 
-document.exitFullscreen(); 
-} 
-} 
-
-buckets.forEach(bucket => { 
-bucket.addEventListener('dragover', (e) => { 
-e.preventDefault(); 
-bucket.classList.add('drag-over'); 
-}); 
-bucket.addEventListener('dragleave', () => { 
-bucket.classList.remove('drag-over'); 
-}); 
-bucket.addEventListener('drop', (e) => { 
-e.preventDefault(); 
-bucket.classList.remove('drag-over'); 
-const cardId = e.dataTransfer.getData('text/plain'); 
-const card = document.getElementById(cardId); 
-if (!card) return; 
-const correctClass = card.getAttribute('data-class'); 
-const bucketClass = bucket.getAttribute('data-class'); 
-if (correctClass === bucketClass) { 
