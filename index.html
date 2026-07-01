@@ -221,6 +221,7 @@ let matchedCount = 0;
 
 function initGame() {
     totalScoreDisplay.innerText = drugData.length;
+    cardsPool.innerHTML = ''; // Clear out pool clean
     
     const shuffled = [...drugData].sort(() => Math.random() - 0.5);
     shuffled.forEach((drug, index) => {
@@ -229,4 +230,3 @@ function initGame() {
         card.id = `drug-${index}`;
         card.draggable = true;
         card.innerText = drug.name;
-        card.setAttribute('data-name', drug.name);
