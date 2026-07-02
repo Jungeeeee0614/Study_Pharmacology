@@ -13,7 +13,6 @@
             --success-color: #2ecc71;
             --error-color: #e74c3c;
         }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
@@ -24,12 +23,7 @@
             flex-direction: column;
             align-items: center;
         }
-
-        h1 {
-            margin-bottom: 5px;
-            color: #1a252f;
-        }
-
+        h1 { margin-bottom: 5px; color: #1a252f; }
         .instructions {
             margin-bottom: 25px;
             font-size: 0.95rem;
@@ -37,7 +31,6 @@
             text-align: center;
             max-width: 600px;
         }
-
         #game-container {
             display: flex;
             flex-direction: column;
@@ -46,7 +39,6 @@
             max-width: 1200px;
             gap: 30px;
         }
-
         #card-deck {
             display: flex;
             flex-wrap: wrap;
@@ -59,7 +51,6 @@
             border-radius: 8px;
             border: 2px dashed #bdc3c7;
         }
-
         .drug-card {
             background-color: var(--card-color);
             color: var(--text-color);
@@ -73,17 +64,8 @@
             user-select: none;
             position: relative;
         }
-
-        .drug-card:active {
-            cursor: grabbing;
-        }
-
-        .drug-card.dragging {
-            opacity: 0.5;
-            transform: scale(0.95);
-        }
-
-        /* Tooltip hint styling */
+        .drug-card:active { cursor: grabbing; }
+        .drug-card.dragging { opacity: 0.5; transform: scale(0.95); }
         .drug-card::after {
             content: "Hint: " attr(data-hint);
             position: absolute;
@@ -105,19 +87,13 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             pointer-events: none;
         }
-
-        .drug-card:hover::after {
-            opacity: 1;
-            visibility: visible;
-        }
-
+        .drug-card:hover::after { opacity: 1; visibility: visible; }
         #zones-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 20px;
             width: 100%;
         }
-
         .class-box {
             background-color: #ecf0f1;
             border: 3px dashed #bdc3c7;
@@ -129,12 +105,10 @@
             gap: 10px;
             transition: background-color 0.2s, border-color 0.2s;
         }
-
         .class-box.drag-over {
             background-color: #e8f4fd;
             border-color: var(--accent-color);
         }
-
         .class-box h3 {
             margin-top: 0;
             margin-bottom: 10px;
@@ -144,30 +118,15 @@
             border-bottom: 2px solid #bdc3c7;
             padding-bottom: 6px;
         }
-
-        .class-box .drug-card {
-            cursor: default;
-            box-shadow: none;
-            border: 2px solid #bdc3c7;
-        }
-
-        .class-box .drug-card::after {
-            display: none; /* Turn off hints once correctly placed */
-        }
-
+        .class-box .drug-card { cursor: default; box-shadow: none; border: 2px solid #bdc3c7; }
+        .class-box .drug-card::after { display: none; }
         .class-box .drug-card.correct {
             background-color: #d4edda;
             color: #155724;
             border-color: var(--success-color);
             animation: pop 0.3s ease;
         }
-
-        .score-board {
-            font-size: 1.3rem;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
+        .score-board { font-size: 1.3rem; font-weight: bold; margin-top: 10px; }
         #reset-btn {
             margin-top: 15px;
             padding: 12px 24px;
@@ -179,11 +138,7 @@
             cursor: pointer;
             font-weight: bold;
         }
-
-        #reset-btn:hover {
-            background-color: #2980b9;
-        }
-
+        #reset-btn:hover { background-color: #2980b9; }
         @keyframes pop {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -192,15 +147,10 @@
     </style>
 </head>
 <body>
-
     <h1>ANS Autonomic Sorting Game</h1>
     <div class="instructions">Drag each drug to its respective receptor class. Hover over a card to read its high-yield chart indications!</div>
-
     <div id="game-container">
-        <!-- Unsorted Cards -->
         <div id="card-deck"></div>
-
-        <!-- Target Classes -->
         <div id="zones-container">
             <div class="class-box" data-class="Nonselective Beta Blockers"><h3>Nonselective Beta Blockers</h3></div>
             <div class="class-box" data-class="B1 Blockers"><h3>B1 Blockers</h3></div>
@@ -216,141 +166,136 @@
             <div class="class-box" data-class="A1 Agonists"><h3>A1 Agonists</h3></div>
             <div class="class-box" data-class="A2 Agonists"><h3>A2 Agonists</h3></div>
         </div>
-
         <div class="score-board">Score: <span id="score">0</span> / <span id="total">0</span></div>
         <button id="reset-btn" onclick="initGame()">Reshuffle & Restart</button>
     </div>
-
     <script>
         const drugData = [
-            // Nonselective Beta Blockers
-            { name: "Propranolol", class: "Nonselective Beta Blockers", hint: "Tremors, migraine prophylaxis, thyroid storm. Lipophilic (crosses BBB)." },
-            { name: "Nadolol", class: "Nonselective Beta Blockers", hint: "Portal HTN / esophageal varices. Hydrophilic (renal clearance)." },
-            { name: "Timolol", class: "Nonselective Beta Blockers", hint: "Chronic glaucoma." },
-            { name: "Pindolol", class: "Nonselective Beta Blockers", hint: "Partial Intrinsic Sympathomimetic Activity (ISA)." },
-            { name: "Sotalol", class: "Nonselective Beta Blockers", hint: "Class III K+ channel blocker." },
+            { "name": "Propranolol", "class": "Nonselective Beta Blockers", "hint": "Tremors, migraine prophylaxis, thyroid storm. Lipophilic (crosses BBB)." },
+            { "name": "Nadolol", "class": "Nonselective Beta Blockers", "hint": "Portal HTN / esophageal varices. Hydrophilic (renal clearance)." },
+            { "name": "Timolol", "class": "Nonselective Beta Blockers", "hint": "Chronic glaucoma." },
+            { "name": "Pindolol", "class": "Nonselective Beta Blockers", "hint": "Partial Intrinsic Sympathomimetic Activity (ISA)." },
+            { "name": "Sotalol", "class": "Nonselective Beta Blockers", "hint": "Class III K+ channel blocker." },
+            { "name": "Metoprolol", "class": "B1 Blockers", "hint": "Post-MI, CHF, rate control (Afib/flutter). *Decreases mortality*" },
+            { "name": "Atenolol", "class": "B1 Blockers", "hint": "Same as Metoprolol except chronic heart failure. Hydrophilic, renal clearance." },
+            { "name": "Esmolol", "class": "B1 Blockers", "hint": "Acute emergencies (Aortic Dissection). Metabolized by RBC esterases." },
+            { "name": "Bisoprolol", "class": "B1 Blockers", "hint": "Post-MI, CHF, rate control. *Decreases mortality*" },
+            { "name": "Betaxolol", "class": "B1 Blockers", "hint": "Chronic glaucoma." },
+            { "name": "Acebutolol", "class": "B1 Blockers", "hint": "Partial Intrinsic Sympathomimetic Activity (ISA)." },
+            { "name": "Nebivolol", "class": "B1 Blockers", "hint": "Stimulates Nitric Oxide (NO) release." },
+            { "name": "Carvedilol", "class": "Mixed Adrenergic Blockers", "hint": "Chronic heart failure. *Decreases mortality*" },
+            { "name": "Labetalol", "class": "Mixed Adrenergic Blockers", "hint": "Hypertensive emergencies (PRE-E)." },
+            { "name": "Isoproterenol", "class": "Nonselective Beta Agonists", "hint": "Severe bradycardia, heart block, Torsades de Pointes." },
+            { "name": "Dobutamine", "class": "B1 Agonists", "hint": "Acute heart failure (Inotropic agent)." },
+            { "name": "Albuterol", "class": "B2 Agonists", "hint": "Acute asthma/COPD; Short-acting." },
+            { "name": "Terbutaline", "class": "B2 Agonists", "hint": "Tocolysis (delaying preterm labor); Short-acting." },
+            { "name": "Salmeterol", "class": "B2 Agonists", "hint": "Chronic asthma/COPD; Long-acting. Use with ICS." },
+            { "name": "Formoterol", "class": "B2 Agonists", "hint": "Chronic asthma/COPD; Long-acting. Use with ICS." },
+            { "name": "Mirabegron", "class": "B3 Agonists", "hint": "Overactive bladder." },
+            { "name": "Norepinephrine", "class": "Mixed Adrenergic Agonists", "hint": "Septic shock. Act on a1, a2, b1." },
+            { "name": "Epinephrine", "class": "Mixed Adrenergic Agonists", "hint": "Anaphylaxis & cardiac arrest. B dominant at low doses, A at high doses." },
+            { "name": "Dopamine", "class": "Mixed Adrenergic Agonists", "hint": "Shock with impaired renal perfusion. D @ low, B @ mid, A @ high doses." },
+            { "name": "Phenoxybenzamine", "class": "Nonselective Alpha Blockers", "hint": "Pheochromocytoma pre-op. *Irreversible*" },
+            { "name": "Phentolamine", "class": "Nonselective Alpha Blockers", "hint": "HTN crises & NE extravasation. *Reversible*" },
+            { "name": "Tamsulosin", "class": "A1 Blockers", "hint": "BPH. Selective for urinary tract." },
+            { "name": "Prazosin", "class": "A1 Blockers", "hint": "PTSD nightmares & BPH with HTN." },
+            { "name": "Terazosin", "class": "A1 Blockers", "hint": "BPH with HTN. Half-life is around 12 hours." },
+            { "name": "Doxazosin", "class": "A1 Blockers", "hint": "BPH with HTN. Half-life is around 22 hours." },
+            { "name": "Mirtazapine", "class": "A2 Blockers", "hint": "Atypical antidepressant. Depression with insomnia & weight loss. Serotonin/Histamine blocker." },
+            { "name": "Yohimbine", "class": "A2 Blockers", "hint": "Alpha-2 antagonist." },
+            { "name": "Phenylephrine", "class": "A1 Agonists", "hint": "Severe hypotension, nasal congestion, & mydriasis." },
+            { "name": "Midodrine", "class": "A1 Agonists", "hint": "Severe orthostatic hypotension." },
+            { "name": "Oxymetazoline", "class": "A1 Agonists", "hint": "Nasal congestion." },
+            { "name": "Clonidine", "class": "A2 Agonists", "hint": "HTN, ADHD, & Opioid withdrawal." },
+            { "name": "A-Methyldopa", "class": "A2 Agonists", "hint": "Gestational HTN. Causes Coombs(+) Positive Hemolytic Anemia." },
+            { "name": "Dexmedetomidine", "class": "A2 Agonists", "hint": "Procedural sedation. *Does NOT cause respiratory depression!*" },
+            { "name": "Tizanidine", "class": "A2 Agonists", "hint": "Severe muscle spasticity." },
+            { "name": "Guanfacine", "class": "A2 Agonists", "hint": "ADHD & Tourette's." },
+            { "name": "Brimonidine", "class": "A2 Agonists", "hint": "Chronic glaucoma." }
+        ];
+
+        let score = 0;
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function initGame() {
+            score = 0;
+            document.getElementById('score').innerText = score;
+            document.getElementById('total').innerText = drugData.length;
             
-            // B1 Blockers
-            { name: "Metoprolol", class: "B1 Blockers", hint: "Post-MI, CHF, rate control (Afib/flutter). *Decreases mortality*" },
-            { name: "Atenolol", class: "B1 Blockers", hint: "Same as Metoprolol except chronic heart failure. Hydrophilic, renal clearance." },
-            { name: "Esmolol", class: "B1 Blockers", hint: "Acute emergencies (Aortic Dissection). Metabolized by RBC esterases." },
-            { name: "Bisoprolol", class: "B1 Blockers", hint: "Post-MI, CHF, rate control. *Decreases mortality*" },
-            { name: "Betaxolol", class: "B1 Blockers", hint: "Chronic glaucoma." },
-            { name: "Acebutolol", class: "B1 Blockers", hint: "Partial Intrinsic Sympathomimetic Activity (ISA)." },
-            { name: "Nebivolol", class: "B1 Blockers", hint: "Stimulates Nitric Oxide (NO) release." },
+            const deck = document.getElementById('card-deck');
+            deck.innerHTML = '';
             
-            // Mixed Adrenergic Blockers
-            { name: "Carvedilol", class: "Mixed Adrenergic Blockers", hint: "Chronic heart failure. *Decreases mortality*" },
-            { name: "Labetalol", class: "Mixed Adrenergic Blockers", hint: "Hypertensive emergencies (PRE-E)." },
-            
-            // Nonselective Beta Agonists
-            { name: "Isoproterenol", class: "Nonselective Beta Agonists", hint: "Severe bradycardia, heart block, Torsades de Pointes." },
-            
-            // B1 Agonists
-            { name: "Dobutamine", class: "B1 Agonists", hint: "Acute heart failure (Inotropic agent)." },
-            
-            // B2 Agonists
-            { name: "Albuterol", class: "B2 Agonists", hint: "Acute asthma/COPD; Short-acting." },
-            { name: "Terbutaline", class: "B2 Agonists", hint: "Tocolysis (delaying preterm labor); Short-acting." },
-            { name: "Salmeterol", class: "B2 Agonists", hint: "Chronic asthma/COPD; Long-acting. Use with ICS." },
-            { name: "Formoterol", class: "B2 Agonists", hint: "Chronic asthma/COPD; Long-acting. Use with ICS." },
-            
-            // B3 Agonists
-            { name: "Mirabegron", class: "B3 Agonists", hint: "Overactive bladder." },
-            
-            // Mixed Adrenergic Agonists
-	 { name: "Norepinephrine", class: "Mixed Adrenergic Agonists", hint: "Septic shock. Act on a1, a2, b1." },
-	 { name: "Epinephrine", class: "Mixed Adrenergic Agonists", hint: "Anaphylaxis & cardiac arrest. B dominant at low doses, A at high doses." }, 
-	 { name: "Dopamine", class: "Mixed Adrenergic Agonists", hint: "Shock with impaired renal perfusion. D @ low, B @ mid, A @ high doses." },
-	
-	// Nonselective Alpha Blockers
-	 { name: "Phenoxybenzamine", class: "Nonselective Alpha Blockers", hint: "Pheochromocytoma pre-op. Irreversible" },
-	 { name: "Phentolamine", class: "Nonselective Alpha Blockers", hint: "HTN crises & NE extravasation. Reversible" },
-	
-	// A1 Blockers
-	 { name: "Tamsulosin", class: "A1 Blockers", hint: "BPH. Selective for urinary tract." },
-	 { name: "Prazosin", class: "A1 Blockers", hint: "PTSD nightmares & BPH with HTN." },
-	 { name: "Terazosin", class: "A1 Blockers", hint: "BPH with HTN. Half-life is around 12 hours." },
-	 { name: "Doxazosin", class: "A1 Blockers", hint: "BPH with HTN. Half-life is around 22 hours." },
-	
-	// A2 Blockers
-	 { name: "Mirtazapine", class: "A2 Blockers", hint: "Atypical antidepressant. Depression with insomnia & weight loss. Serotonin/Histamine blocker." },
-	 { name: "Yohimbine", class: "A2 Blockers", hint: "Alpha-2 antagonist." },
-	
-	// A1 Agonists
-	 { name: "Phenylephrine", class: "A1 Agonists", hint: "Severe hypotension, nasal congestion, & mydriasis." },
-	 { name: "Midodrine", class: "A1 Agonists", hint: "Severe orthostatic hypotension." },
-	 { name: "Oxymetazoline", class: "A1 Agonists", hint: "Nasal congestion." },
-	
-	// A2 Agonists
-	 { name: "Clonidine", class: "A2 Agonists", hint: "HTN, ADHD, & Opioid withdrawal." },
-	 { name: "A-Methyldopa", class: "A2 Agonists", hint: "Gestational HTN. Causes Coombs(+) Positive Hemolytic Anemia." },
-	 { name: "Dexmedetomidine", class: "A2 Agonists", hint: "Procedural sedation. Does NOT cause respiratory depression!" },
-	 { name: "Tizanidine", class: "A2 Agonists", hint: "Severe muscle spasticity." },
-	 { name: "Guanfacine", class: "A2 Agonists", hint: "ADHD & Tourette's." },
-	 { name: "Brimonidine", class: "A2 Agonists", hint: "Chronic glaucoma." }
-	];
-	let score = 0;
-	function shuffle(array) {
-	return array.sort(() => Math.random() - 0.5);
-	}
-	function initGame() {
-	score = 0;
-	document.getElementById('score').innerText = score;
-	document.getElementById('total').innerText = drugData.length;
-	const deck = document.getElementById('card-deck');
-	deck.innerHTML = '';
-	document.querySelectorAll('.class-box').forEach(box => {
-	const header = box.querySelector('h3');
-	box.innerHTML = '';
-	box.appendChild(header);
-	});
-	const shuffledDrugs = shuffle([...drugData]);
-	shuffledDrugs.forEach((drug, index) => {
-	const card = document.createElement('div');
-	card.className = 'drug-card';
-	card.id = drug-${index};
-	card.draggable = true;
-	card.innerText = drug.name;
-	card.dataset.correctClass = drug.class;
-	card.setAttribute('data-hint', drug.hint);
-	card.addEventListener('dragstart', dragStart);
-	card.addEventListener('dragend', dragEnd);
-	deck.appendChild(card);
-	});
-	}
-	function dragStart(e) {
-	e.dataTransfer.setData('text/plain', e.target.id);
-	setTimeout(() => { e.target.classList.add('dragging'); }, 0);
-	}
-	function dragEnd(e) {
-	e.target.classList.remove('dragging');
-	}
-	const boxes = document.querySelectorAll('.class-box');
-	boxes.forEach(box => {
-	box.addEventListener('dragover', (e) => {
-	e.preventDefault();
-	box.classList.add('drag-over');
-	});
-	box.addEventListener('dragleave', () => { box.classList.remove('drag-over'); });
-	box.addEventListener('drop', (e) => {
-	e.preventDefault();
-	box.classList.remove('drag-over');
-	const cardId = e.dataTransfer.getData('text/plain');
-	const card = document.getElementById(cardId);
-	if (!card) return;
-	const targetClass = box.dataset.class;
-	const correctClass = card.dataset.correctClass;
-	if (targetClass === correctClass) {
-	card.draggable = false;
-	card.classList.add('correct');
-	box.appendChild(card);
-	score++;
-	document.getElementById('score').innerText = score;
-	} else {
-	card.style.borderColor = 'var(--error-color)';
-	setTimeout(() => { card.style.borderColor = 'transparent'; }, 500);
-	}
-	});
-	});
-window.onload = initGame;
+            document.querySelectorAll('.class-box').forEach(box => {
+                const header = box.querySelector('h3');
+                box.innerHTML = '';
+                box.appendChild(header);
+            });
+
+            const shuffledDrugs = shuffle([...drugData]);
+            shuffledDrugs.forEach((drug, index) => {
+                const card = document.createElement('div');
+                card.className = 'drug-card';
+                card.id = `drug-${index}`;
+                card.draggable = true;
+                card.innerText = drug.name;
+                card.dataset.correctClass = drug.class;
+                card.setAttribute('data-hint', drug.hint);
+                
+                card.addEventListener('dragstart', dragStart);
+                card.addEventListener('dragend', dragEnd);
+                
+                deck.appendChild(card);
+            });
+        }
+
+        function dragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.id);
+            setTimeout(() => { e.target.classList.add('dragging'); }, 0);
+        }
+
+        function dragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        const boxes = document.querySelectorAll('.class-box');
+        boxes.forEach(box => {
+            box.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                box.classList.add('drag-over');
+            });
+
+            box.addEventListener('dragleave', () => { box.classList.remove('drag-over'); });
+
+            box.addEventListener('drop', (e) => {
+                e.preventDefault();
+                box.classList.remove('drag-over');
+                
+                const cardId = e.dataTransfer.getData('text/plain');
+                const card = document.getElementById(cardId);
+                
+                if (!card) return;
+
+                const targetClass = box.dataset.class;
+                const correctClass = card.dataset.correctClass;
+
+                if (targetClass === correctClass) {
+                    card.draggable = false;
+                    card.classList.add('correct');
+                    box.appendChild(card);
+                    
+                    score++;
+                    document.getElementById('score').innerText = score;
+                } else {
+                    card.style.borderColor = 'var(--error-color)';
+                    setTimeout(() => { card.style.borderColor = 'transparent'; }, 500);
+                }
+            });
+        });
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>
