@@ -25,13 +25,14 @@
         header {
             text-align: center;
             margin-bottom: 20px;
-            position: sticky;
-            top: 0;
-            background: rgba(248, 250, 252, 0.95);
-            padding: 10px;
+            background: white;
+            padding: 15px;
             width: 100%;
-            z-index: 100;
-            border-bottom: 1px solid var(--border-color);
+            max-width: 1400px;
+            box-sizing: border-box;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         h1 {
             margin: 0 0 5px 0;
@@ -45,8 +46,38 @@
         #score-tracker {
             font-weight: bold;
             color: var(--accent-color);
-            margin-top: 5px;
+            margin-top: 8px;
+            font-size: 1.1rem;
         }
+        
+        /* New Safe Layout: Medication Deck at the Top */
+        #deck-container {
+            width: 100%;
+            max-width: 1400px;
+            background: #e2e8f0; 
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-sizing: border-box;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+        #deck-container h2 {
+            margin: 0 0 15px 0;
+            font-size: 1rem;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: center;
+        }
+        #deck {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            min-height: 100px;
+        }
+
         /* Grid Layout for Drop Zones */
         #zones-container {
             display: grid;
@@ -85,34 +116,12 @@
             width: 100%;
             padding-bottom: 5px;
         }
-        /* Deck / Dock Area - FIXED TO BOTTOM TO STAND OUT */
-        #deck-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #cbd5e1; /* Darker background contrast so it is clearly visible */
-            border-top: 3px solid #94a3b8;
-            padding: 20px;
-            box-shadow: 0 -10px 25px rgba(0,0,0,0.15);
-            height: 160px;
-            overflow-y: auto;
-            z-index: 1000;
-        }
-        #deck {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 1400px;
-            margin: 0 auto;
-            min-height: 100px;
-        }
-        /* Robust 3D Card Mechanics */
+
+        /* 3D Card Mechanics */
         .card-container {
             width: 150px;
             height: 85px;
-            min-height: 85px; /* Keeps card safe from vertical compression */
+            min-height: 85px; 
             perspective: 1000px;
             cursor: grab;
             user-select: none;
@@ -124,7 +133,6 @@
         .card {
             width: 100%;
             height: 100%;
-            min-height: 85px;
             position: relative;
             transform-style: preserve-3d;
             transition: transform 0.4s ease;
@@ -165,6 +173,7 @@
             text-align: center;
             line-height: 1.3;
         }
+
         /* Correct Placement Modifier Styles */
         .card-container.matched {
             cursor: pointer;
@@ -181,10 +190,9 @@
             background-color: #ecfdf5;
             color: #065f46;
         }
-        /* Space-saver bottom padding so content doesn't hide behind deck */
+
         .main-content {
             width: 100%;
-            padding-bottom: 240px;
             display: flex;
             justify-content: center;
         }
@@ -194,9 +202,15 @@
 
 <header>
     <h1>Autonomic Pharmacology Matcher 💊</h1>
-    <p>Look at the grey dock at the bottom! Drag medications up to their correct drop zone class.</p>
+    <p>Drag the medications from the grey pool down into their correct target class. Correctly matched cards can be clicked to flip for study notes!</p>
     <div id="score-tracker">Matched: <span id="match-count">0</span> / 41</div>
 </header>
+
+<!-- Fixed Layout: Pool of available medications now flows naturally at the top -->
+<div id="deck-container">
+    <h2>Available Medications (Drag from here)</h2>
+    <div id="deck"></div>
+</div>
 
 <div class="main-content">
     <!-- Target Categories Grid (13 Classes) -->
@@ -215,11 +229,6 @@
         <div class="zone" data-class="a1-agonists"><h3>A1 Agonists</h3></div>
         <div class="zone" data-class="a2-agonists"><h3>A2 Agonists</h3></div>
     </div>
-</div>
-
-<!-- Random Spawn Container at the bottom -->
-<div id="deck-container">
-    <div id="deck"></div>
 </div>
 
 <script>
@@ -246,4 +255,3 @@ const drugDatabase = [
     // B1 Agonists (1)
     { id: "d16", name: "Dobutamine", class: "b1-agonists", notes: "Indicated: Acute Heart Failure/Cardiogenic Shock. Inotropic." },
     // B2 Agonists (4)
-    { id: "d17", name: "Albuterol", class: "b2-agonists", notes: "Short-Acting formulation (SABA) for Acute Asthma/COPD rescues." },
