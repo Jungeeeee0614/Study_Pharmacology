@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ANS Pharmacology Sorting Game</title>
+    
+    <link rel="manifest" href="manifest.json">
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -348,6 +350,15 @@
                 }
             });
         });
+
+        // Mobile Activation Hooks: Automatically runs the background mobile container initialization
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                .then(() => console.log("App container ready!"))
+                .catch((err) => console.log("Mobile link configuration skipped: ", err));
+            });
+        }
 
         window.onload = initGame;
     </script>
