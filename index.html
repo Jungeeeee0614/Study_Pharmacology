@@ -72,7 +72,6 @@
         .drug-card:active { cursor: grabbing; }
         .drug-card.dragging { opacity: 0.5; transform: scale(0.95); }
         
-        /* Hint text layout (hidden by default) */
         .hint-text {
             display: none;
             font-size: 0.8rem;
@@ -83,9 +82,7 @@
             border-top: 1px dashed #a3cfbb;
             width: 100%;
         }
-        .hint-text.visible {
-            display: block;
-        }
+        .hint-text.visible { display: block; }
 
         #zones-container {
             display: grid;
@@ -118,12 +115,7 @@
             padding-bottom: 6px;
         }
         
-        /* Styles applied exclusively once cards live inside the correct boxes */
-        .class-box .drug-card { 
-            cursor: pointer; 
-            box-shadow: none; 
-            border: 2px solid #bdc3c7; 
-        }
+        .class-box .drug-card { cursor: pointer; box-shadow: none; border: 2px solid #bdc3c7; }
         .class-box .drug-card.correct {
             background-color: #d4edda;
             color: #155724;
@@ -153,7 +145,7 @@
 </head>
 <body>
     <h1>ANS Autonomic Sorting Game</h1>
-    <div class="instructions">Drag each drug to its receptor class. Once correctly placed, <strong>click on the card</strong> to toggle its clinical high-yield notes open and closed!</div>
+    <div class="instructions">Cards are limited to <strong>5 at a time</strong> for focus. Drag each drug to its receptor class. Once correctly placed, click on the card to toggle your chart notes!</div>
     <div id="game-container">
         <div id="card-deck"></div>
         <div id="zones-container">
@@ -176,51 +168,77 @@
     </div>
     <script>
         const drugData = [
+            // Nonselective Beta Blockers
             { "name": "Propranolol", "class": "Nonselective Beta Blockers", "hint": "Tremors, migraine prophylaxis, thyroid storm. Lipophilic (crosses BBB)." },
             { "name": "Nadolol", "class": "Nonselective Beta Blockers", "hint": "Portal HTN / esophageal varices. Hydrophilic (renal clearance)." },
             { "name": "Timolol", "class": "Nonselective Beta Blockers", "hint": "Chronic glaucoma." },
             { "name": "Pindolol", "class": "Nonselective Beta Blockers", "hint": "Partial Intrinsic Sympathomimetic Activity (ISA)." },
             { "name": "Sotalol", "class": "Nonselective Beta Blockers", "hint": "Class III K+ channel blocker." },
-            { "name": "Metoprolol", "class": "B1 Blockers", "hint": "Post-MI, CHF, rate control (Afib/flutter). *Decreases mortality*" },
-            { "name": "Atenolol", "class": "B1 Blockers", "hint": "Same as Metoprolol except chronic heart failure. Hydrophilic, renal clearance." },
-            { "name": "Esmolol", "class": "B1 Blockers", "hint": "Acute emergencies (Aortic Dissection). Metabolized by RBC esterases." },
-            { "name": "Bisoprolol", "class": "B1 Blockers", "hint": "Post-MI, CHF, rate control. *Decreases mortality*" },
-            { "name": "Betaxolol", "class": "B1 Blockers", "hint": "Chronic glaucoma." },
+            
+            // B1 Blockers
+            { "name": "Metoprolol", "class": "B1 Blockers", "hint": "Post-MI, Chronic Heart Failure, & Rate Control (Afib/flutter). *decreases mortality*" },
+            { "name": "Atenolol", "class": "B1 Blockers", "hint": "Indicated in same as Metoprolol & Bisoprolol EXCEPT for Chronic Heart Failure; Hydrophilic; Cleared by Kidneys." },
+            { "name": "Esmolol", "class": "B1 Blockers", "hint": "Indicated in Acute Emergencies (Aortic Dissection); Metabolized by rbc esterases." },
+            { "name": "Bisoprolol", "class": "B1 Blockers", "hint": "Indicated in Post MI, Chronic Heart Failure, & Rate Control (Afib/flutter). *decreases mortality*" },
+            { "name": "Betaxolol", "class": "B1 Blockers", "hint": "Indicated in Chronic Glaucoma." },
             { "name": "Acebutolol", "class": "B1 Blockers", "hint": "Partial Intrinsic Sympathomimetic Activity (ISA)." },
             { "name": "Nebivolol", "class": "B1 Blockers", "hint": "Stimulates Nitric Oxide (NO) release." },
-            { "name": "Carvedilol", "class": "Mixed Adrenergic Blockers", "hint": "Chronic heart failure. *Decreases mortality*" },
-            { "name": "Labetalol", "class": "Mixed Adrenergic Blockers", "hint": "Hypertensive emergencies (PRE-E)." },
-            { "name": "Isoproterenol", "class": "Nonselective Beta Agonists", "hint": "Severe bradycardia, heart block, Torsades de Pointes." },
-            { "name": "Dobutamine", "class": "B1 Agonists", "hint": "Acute heart failure (Inotropic agent)." },
-            { "name": "Albuterol", "class": "B2 Agonists", "hint": "Acute asthma/COPD; Short-acting." },
-            { "name": "Terbutaline", "class": "B2 Agonists", "hint": "Tocolysis (delaying preterm labor); Short-acting." },
-            { "name": "Salmeterol", "class": "B2 Agonists", "hint": "Chronic asthma/COPD; Long-acting. Use with ICS." },
-            { "name": "Formoterol", "class": "B2 Agonists", "hint": "Chronic asthma/COPD; Long-acting. Use with ICS." },
-            { "name": "Mirabegron", "class": "B3 Agonists", "hint": "Overactive bladder." },
-            { "name": "Norepinephrine", "class": "Mixed Adrenergic Agonists", "hint": "Septic shock. Act on a1, a2, b1." },
-            { "name": "Epinephrine", "class": "Mixed Adrenergic Agonists", "hint": "Anaphylaxis & cardiac arrest. B dominant at low doses, A at high doses." },
-            { "name": "Dopamine", "class": "Mixed Adrenergic Agonists", "hint": "Shock with impaired renal perfusion. D @ low, B @ mid, A @ high doses." },
-            { "name": "Phenoxybenzamine", "class": "Nonselective Alpha Blockers", "hint": "Pheochromocytoma pre-op. *Irreversible*" },
-            { "name": "Phentolamine", "class": "Nonselective Alpha Blockers", "hint": "HTN crises & NE extravasation. *Reversible*" },
-            { "name": "Tamsulosin", "class": "A1 Blockers", "hint": "BPH. Selective for urinary tract." },
-            { "name": "Prazosin", "class": "A1 Blockers", "hint": "PTSD nightmares & BPH with HTN." },
-            { "name": "Terazosin", "class": "A1 Blockers", "hint": "BPH with HTN. Half-life is around 12 hours." },
-            { "name": "Doxazosin", "class": "A1 Blockers", "hint": "BPH with HTN. Half-life is around 22 hours." },
-            { "name": "Mirtazapine", "class": "A2 Blockers", "hint": "Atypical antidepressant. Depression with insomnia & weight loss. Serotonin/Histamine blocker." },
-            { "name": "Yohimbine", "class": "A2 Blockers", "hint": "Alpha-2 antagonist." },
-            { "name": "Phenylephrine", "class": "A1 Agonists", "hint": "Severe hypotension, nasal congestion, & mydriasis." },
-            { "name": "Midodrine", "class": "A1 Agonists", "hint": "Severe orthostatic hypotension." },
-            { "name": "Oxymetazoline", "class": "A1 Agonists", "hint": "Nasal congestion." },
-            { "name": "Clonidine", "class": "A2 Agonists", "hint": "HTN, ADHD, & Opioid withdrawal." },
-            { "name": "A-Methyldopa", "class": "A2 Agonists", "hint": "Gestational HTN. Causes Coombs(+) Positive Hemolytic Anemia." },
-            { "name": "Dexmedetomidine", "class": "A2 Agonists", "hint": "Procedural sedation. *Does NOT cause respiratory depression!*" },
-            { "name": "Tizanidine", "class": "A2 Agonists", "hint": "Severe muscle spasticity." },
-            { "name": "Guanfacine", "class": "A2 Agonists", "hint": "ADHD & Tourette's." },
-            { "name": "Brimonidine", "class": "A2 Agonists", "hint": "Chronic glaucoma." }
+            
+            // Mixed Adrenergic Blockers
+            { "name": "Carvedilol", "class": "Mixed Adrenergic Blockers", "hint": "Indicated in Chronic Heart Failure. *decreases mortality*" },
+            { "name": "Labetalol", "class": "Mixed Adrenergic Blockers", "hint": "Indicated in Hypertensive Emergencies (PRE-E)." },
+            
+            // Nonselective Beta Agonists
+            { "name": "Isoproterenol", "class": "Nonselective Beta Agonists", "hint": "Indicated in Severe Bradycardia, Heart Block, & Torsades de Pointes." },
+            
+            // B1 Agonists
+            { "name": "Dobutamine", "class": "B1 Agonists", "hint": "Indicated in Acute Heart Failure (Inotropic Agent)." },
+            
+            // B2 Agonists
+            { "name": "Albuterol", "class": "B2 Agonists", "hint": "Indicated in Acute Asthma/COPD; Short-Acting." },
+            { "name": "Terbutaline", "class": "B2 Agonists", "hint": "Indicated in Tocolysis (Delaying Preterm Labor); Short-Acting." },
+            { "name": "Salmeterol", "class": "B2 Agonists", "hint": "Indicated in Chronic Asthma/COPD; Long-Acting. *use with an inhaled corticosteroid*" },
+            { "name": "Formoterol", "class": "B2 Agonists", "hint": "Indicated in Chronic Asthma/COPD; Long-Acting. *use with an inhaled corticosteroid*" },
+            
+            // B3 Agonists
+            { "name": "Mirabegron", "class": "B3 Agonists", "hint": "Indicated in Overactive Bladder." },
+            
+            // Mixed Adrenergic Agonists
+            { "name": "Norepinephrine", "class": "Mixed Adrenergic Agonists", "hint": "Indicated in Septic Shock. *A1,A2,B1*" },
+            { "name": "Epinephrine", "class": "Mixed Adrenergic Agonists", "hint": "Indicated in Anaphylaxis & Cardiac Arrest. *B @ low doses, A @ high doses*" },
+            { "name": "Dopamine", "class": "Mixed Adrenergic Agonists", "hint": "Indicated in Shock with Impaired Renal Perfusion. *D @ low doses, B @ medium doses, A @ high doses*" },
+            
+            // Nonselective Alpha Blockers
+            { "name": "Phenoxybenzamine", "class": "Nonselective Alpha Blockers", "hint": "Indicated in Pheochromocytoma Pre-Op. *Irreversible*" },
+            { "name": "Phentolamine", "class": "Nonselective Alpha Blockers", "hint": "Indicated in HTN Crises & Norepinephrine Extravasation. *Reversible*" },
+            
+            // A1 Blockers
+            { "name": "Tamsulosin", "class": "A1 Blockers", "hint": "Indicated in BPH. *Selective for Urinary Tract*" },
+            { "name": "Prazosin", "class": "A1 Blockers", "hint": "Indicated in PTSD Nightmares & BPH w HTN." },
+            { "name": "Terazosin", "class": "A1 Blockers", "hint": "Indicated in BPH w HTN. *half-life is around 12 hours*" },
+            { "name": "Doxazosin", "class": "A1 Blockers", "hint": "Indicated in BPH w HTN. *half-life is around 22 hours*" },
+            
+            // A2 Blockers
+            { "name": "Mirtazapine", "class": "A2 Blockers", "hint": "Atypical Antidepressant. Indicated in Depression with Insomnia & Weight Loss. *Also a Serotonin & Histamine Receptor Blocker*" },
+            { "name": "Yohimbine", "class": "A2 Blockers", "hint": "Alpha-2 blocker variant." },
+            
+            // A1 Agonists
+            { "name": "Phenylephrine", "class": "A1 Agonists", "hint": "Indicated in Severe Hypotension, Nasal Congestion, & Mydriasis." },
+            { "name": "Midodrine", "class": "A1 Agonists", "hint": "Indicated in Severe Orthostatic Hypotension." },
+            { "name": "Oxymetazoline", "class": "A1 Agonists", "hint": "Indicated in Nasal Congestion." },
+            
+            // A2 Agonists
+            { "name": "Clonidine", "class": "A2 Agonists", "hint": "Indicated in HTN, ADHD, & Opioid Withdrawal." },
+            { "name": "A-Methyldopa", "class": "A2 Agonists", "hint": "Indicated in Gestational HTN; Causes Coombs' Positive Hemolytic Anemia." },
+            { "name": "Dexmedetomidine", "class": "A2 Agonists", "hint": "Indicated in Procedural Sedation. *Does NOT cause respiratory depression!*" },
+            { "name": "Tizanidine", "class": "A2 Agonists", "hint": "Indicated in Severe Muscle Spasticity." },
+            { "name": "Guanfacine", "class": "A2 Agonists", "hint": "Indicated in ADHD & Tourette's." },
+            { "name": "Brimonidine", "class": "A2 Agonists", "hint": "Indicated in Chronic Glaucoma." }
         ];
-
+        let shuffledPool = [];
+        let activeHand = [];
         let score = 0;
-        let isCorrectPlaced = false;
+        const HAND_LIMIT = 5;
 
         function shuffle(array) {
             return array.sort(() => Math.random() - 0.5);
@@ -231,17 +249,27 @@
             document.getElementById('score').innerText = score;
             document.getElementById('total').innerText = drugData.length;
             
-            const deck = document.getElementById('card-deck');
-            deck.innerHTML = '';
-            
             document.querySelectorAll('.class-box').forEach(box => {
                 const header = box.querySelector('h3');
                 box.innerHTML = '';
                 box.appendChild(header);
             });
 
-            const shuffledDrugs = shuffle([...drugData]);
-            shuffledDrugs.forEach((drug, index) => {
+            shuffledPool = shuffle([...drugData]);
+            activeHand = [];
+            refillHand();
+        }
+
+        function refillHand() {
+            const deckElement = document.getElementById('card-deck');
+            
+            while (activeHand.length < HAND_LIMIT && shuffledPool.length > 0) {
+                const nextDrug = shuffledPool.pop();
+                activeHand.push(nextDrug);
+            }
+
+            deckElement.innerHTML = '';
+            activeHand.forEach((drug, index) => {
                 const card = document.createElement('div');
                 card.className = 'drug-card';
                 card.id = `drug-${index}`;
@@ -256,7 +284,6 @@
                 hintText.innerText = drug.hint;
                 card.appendChild(hintText);
 
-                // Click event listener: Only triggers if the card is inside a class box
                 card.addEventListener('click', () => {
                     if (card.classList.contains('correct')) {
                         hintText.classList.toggle('visible');
@@ -264,11 +291,12 @@
                 });
                 
                 card.dataset.correctClass = drug.class;
+                card.dataset.handIndex = index;
                 
                 card.addEventListener('dragstart', dragStart);
                 card.addEventListener('dragend', dragEnd);
                 
-                deck.appendChild(card);
+                deckElement.appendChild(card);
             });
         }
 
@@ -303,12 +331,17 @@
                 const correctClass = card.dataset.correctClass;
 
                 if (targetClass === correctClass) {
+                    const handIdx = parseInt(card.dataset.handIndex);
+                    activeHand.splice(handIdx, 1);
+
                     card.draggable = false;
                     card.classList.add('correct');
                     box.appendChild(card);
                     
                     score++;
                     document.getElementById('score').innerText = score;
+
+                    refillHand();
                 } else {
                     card.style.borderColor = 'var(--error-color)';
                     setTimeout(() => { card.style.borderColor = 'transparent'; }, 500);
