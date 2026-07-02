@@ -50,7 +50,6 @@
             font-size: 1.1rem;
         }
         
-        /* New Safe Layout: Medication Deck at the Top */
         #deck-container {
             width: 100%;
             max-width: 1400px;
@@ -78,7 +77,20 @@
             min-height: 100px;
         }
 
-        /* Grid Layout for Drop Zones */
+        /* Error reporter box just in case */
+        #error-log {
+            display: none;
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 1400px;
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+
         #zones-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -117,7 +129,6 @@
             padding-bottom: 5px;
         }
 
-        /* 3D Card Mechanics */
         .card-container {
             width: 150px;
             height: 85px;
@@ -174,7 +185,6 @@
             line-height: 1.3;
         }
 
-        /* Correct Placement Modifier Styles */
         .card-container.matched {
             cursor: pointer;
             height: auto;
@@ -206,14 +216,14 @@
     <div id="score-tracker">Matched: <span id="match-count">0</span> / 41</div>
 </header>
 
-<!-- Fixed Layout: Pool of available medications now flows naturally at the top -->
+<div id="error-log"></div>
+
 <div id="deck-container">
     <h2>Available Medications (Drag from here)</h2>
-    <div id="deck"></div>
+    <div id="deck">Loading medications... if this message stays here, JavaScript execution is blocked or failed.</div>
 </div>
 
 <div class="main-content">
-    <!-- Target Categories Grid (13 Classes) -->
     <div id="zones-container">
         <div class="zone" data-class="nonselective-beta-blockers"><h3>Nonselective Beta-Blockers</h3></div>
         <div class="zone" data-class="b1-blockers"><h3>B1 Blockers</h3></div>
@@ -232,14 +242,13 @@
 </div>
 
 <script>
+// Encapsulating variables safely
 const drugDatabase = [
-    // Nonselective Beta-Blockers (5)
     { id: "d1", name: "Propranolol", class: "nonselective-beta-blockers", notes: "Indicated: Tremors, Migraine Prophylaxis, Thyroid Storm. Crosses BBB." },
     { id: "d2", name: "Nadolol", class: "nonselective-beta-blockers", notes: "Indicated: Portal Hypertension. Hydrophilic -> cleared via kidneys." },
     { id: "d3", name: "Timolol", class: "nonselective-beta-blockers", notes: "Indicated: Chronic Glaucoma. Decreases aqueous humor production." },
     { id: "d4", name: "Pindolol", class: "nonselective-beta-blockers", notes: "Possesses Partial Intrinsic Sympathomimetic Activity (ISA)." },
     { id: "d5", name: "Sotalol", class: "nonselective-beta-blockers", notes: "Class III Potassium (K+) Channel Blocker characteristics." },
-    // B1 Blockers (7)
     { id: "d6", name: "Metoprolol", class: "b1-blockers", notes: "Indicated: Post MI, Heart Failure. Decreases mortality." },
     { id: "d7", name: "Atenolol", class: "b1-blockers", notes: "Beta-1 selective blocker. Hydrophilic -> cleared by kidneys." },
     { id: "d8", name: "Esmolol", class: "b1-blockers", notes: "Indicated: Aortic Dissection. Ultra-short acting; RBC esterases." },
@@ -247,11 +256,7 @@ const drugDatabase = [
     { id: "d10", name: "Betaxolol", class: "b1-blockers", notes: "Beta-1 selective blocker used topically for Chronic Glaucoma." },
     { id: "d11", name: "Acebutolol", class: "b1-blockers", notes: "Beta-1 selective blocker with Intrinsic Sympathomimetic Activity." },
     { id: "d12", name: "Nebivolol", class: "b1-blockers", notes: "Stimulates Nitric Oxide (NO) release causing direct vasodilation." },
-    // Mixed Adrenergic Blockers (2)
     { id: "d13", name: "Carvedilol", class: "mixed-adrenergic-blockers", notes: "Blocks B1, B2, and A1. Heart Failure. Decreases mortality." },
     { id: "d14", name: "Labetalol", class: "mixed-adrenergic-blockers", notes: "Blocks B1, B2, and A1. Used in Pre-eclampsia emergencies." },
-    // Nonselective Beta-Agonists (1)
     { id: "d15", name: "Isoproterenol", class: "nonselective-beta-agonists", notes: "Action at B1 & B2. Used for severe Bradycardia & Torsades." },
-    // B1 Agonists (1)
     { id: "d16", name: "Dobutamine", class: "b1-agonists", notes: "Indicated: Acute Heart Failure/Cardiogenic Shock. Inotropic." },
-    // B2 Agonists (4)
