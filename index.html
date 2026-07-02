@@ -54,7 +54,7 @@
         .drug-card {
             background-color: var(--card-color);
             color: var(--text-color);
-            padding: 10px 18px;
+            padding: 12px 18px;
             border-radius: 6px;
             font-weight: 600;
             cursor: grab;
@@ -66,40 +66,26 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-width: 130px;
+            min-width: 140px;
             text-align: center;
         }
         .drug-card:active { cursor: grabbing; }
         .drug-card.dragging { opacity: 0.5; transform: scale(0.95); }
         
-        /* Click-to-reveal hint elements */
-        .hint-badge {
-            display: inline-block;
-            margin-top: 5px;
-            background-color: #7f8c8d;
-            color: white;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 0.75rem;
-            text-align: center;
-            line-height: 18px;
-            cursor: pointer;
-            font-weight: bold;
-            user-select: none;
-        }
-        .hint-badge:hover { background-color: #34495e; }
+        /* Hint text layout (hidden by default) */
         .hint-text {
             display: none;
             font-size: 0.8rem;
             font-weight: normal;
-            color: #7f8c8d;
+            color: #155724;
             margin-top: 8px;
             padding-top: 5px;
-            border-top: 1px dashed #bdc3c7;
+            border-top: 1px dashed #a3cfbb;
             width: 100%;
         }
-        .hint-text.visible { display: block; }
+        .hint-text.visible {
+            display: block;
+        }
 
         #zones-container {
             display: grid;
@@ -131,15 +117,20 @@
             border-bottom: 2px solid #bdc3c7;
             padding-bottom: 6px;
         }
-        .class-box .drug-card { cursor: default; box-shadow: none; border: 2px solid #bdc3c7; }
-        .class-box .hint-badge { display: none; } /* Hide hint buttons inside correct categories */
-        .class-box .hint-text { display: none !important; }
+        
+        /* Styles applied exclusively once cards live inside the correct boxes */
+        .class-box .drug-card { 
+            cursor: pointer; 
+            box-shadow: none; 
+            border: 2px solid #bdc3c7; 
+        }
         .class-box .drug-card.correct {
             background-color: #d4edda;
             color: #155724;
             border-color: var(--success-color);
             animation: pop 0.3s ease;
         }
+        
         .score-board { font-size: 1.3rem; font-weight: bold; margin-top: 10px; }
         #reset-btn {
             margin-top: 15px;
@@ -162,7 +153,7 @@
 </head>
 <body>
     <h1>ANS Autonomic Sorting Game</h1>
-    <div class="instructions">Drag each drug to its respective receptor class. If you get stuck, click the <strong>"?" button</strong> on a card to show/hide its clinical notes!</div>
+    <div class="instructions">Drag each drug to its receptor class. Once correctly placed, <strong>click on the card</strong> to toggle its clinical high-yield notes open and closed!</div>
     <div id="game-container">
         <div id="card-deck"></div>
         <div id="zones-container">
@@ -229,6 +220,7 @@
         ];
 
         let score = 0;
+        let isCorrectPlaced = false;
 
         function shuffle(array) {
             return array.sort(() => Math.random() - 0.5);
@@ -259,19 +251,16 @@
                 nameSpan.innerText = drug.name;
                 card.appendChild(nameSpan);
 
-                const hintBadge = document.createElement('span');
-                hintBadge.className = 'hint-badge';
-                hintBadge.innerText = '?';
-                card.appendChild(hintBadge);
-
                 const hintText = document.createElement('div');
                 hintText.className = 'hint-text';
                 hintText.innerText = drug.hint;
                 card.appendChild(hintText);
 
-                hintBadge.addEventListener('click', (e) => {
-                    e.stopPropagation(); 
-                    hintText.classList.toggle('visible');
+                // Click event listener: Only triggers if the card is inside a class box
+                card.addEventListener('click', () => {
+                    if (card.classList.contains('correct')) {
+                        hintText.classList.toggle('visible');
+                    }
                 });
                 
                 card.dataset.correctClass = drug.class;
