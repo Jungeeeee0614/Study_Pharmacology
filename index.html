@@ -6,6 +6,14 @@
     <title>ANS Pharmacology Sorting Game</title>
     
     <link rel="manifest" href="manifest.json">
+    
+    <!-- MOBILE TOUCH ADAPTER: Converts finger gestures into mouse drag-and-drop actions -->
+    <script src="https://jsdelivr.net"></script>
+    <script>
+        // Initializes the mobile touch container engine automatically
+        DragDropPolyfill.Initialize({});
+    </script>
+
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -24,6 +32,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            /* Prevents your iPhone from scrolling or bouncing the screen while dragging a card */
+            touch-action: none; 
         }
         h1 { margin-bottom: 5px; color: #1a252f; }
         .instructions {
@@ -70,6 +80,8 @@
             justify-content: center;
             min-width: 140px;
             text-align: center;
+            /* Optimizes card elements for mobile finger touch layers */
+            touch-action: none;
         }
         .drug-card:active { cursor: grabbing; }
         .drug-card.dragging { opacity: 0.5; transform: scale(0.95); }
