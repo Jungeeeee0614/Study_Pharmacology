@@ -1,262 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Autonomic Pharmacology Match Game</title>
-    <style>
-        :root {
-            --bg-color: #f8fafc;
-            --text-color: #0f172a;
-            --accent-color: #2563eb;
-            --success-color: #16a34a;
-            --border-color: #cbd5e1;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-            background: white;
-            padding: 15px;
-            width: 100%;
-            max-width: 1400px;
-            box-sizing: border-box;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        h1 {
-            margin: 0 0 5px 0;
-            color: #1e3a8a;
-        }
-        p {
-            margin: 0;
-            color: #64748b;
-            font-size: 0.95rem;
-        }
-        #score-tracker {
-            font-weight: bold;
-            color: var(--accent-color);
-            margin-top: 8px;
-            font-size: 1.1rem;
-        }
-        
-        #deck-container {
-            width: 100%;
-            max-width: 1400px;
-            background: #e2e8f0; 
-            border: 2px solid #cbd5e1;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 30px;
-            box-sizing: border-box;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-        }
-        #deck-container h2 {
-            margin: 0 0 15px 0;
-            font-size: 1rem;
-            color: #475569;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            text-align: center;
-        }
-        #deck {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-            min-height: 100px;
-        }
-
-        /* Error reporter box just in case */
-        #error-log {
-            display: none;
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            width: 100%;
-            max-width: 1400px;
-            box-sizing: border-box;
-            font-family: monospace;
-        }
-
-        #zones-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
-            width: 100%;
-            max-width: 1400px;
-            margin-bottom: 40px;
-        }
-        .zone {
-            min-height: 180px;
-            background: white;
-            border: 2px dashed var(--border-color);
-            border-radius: 8px;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            align-items: center;
-            transition: all 0.2s ease;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .zone.drag-over {
-            border-color: var(--accent-color);
-            background-color: #eff6ff;
-            transform: scale(1.01);
-        }
-        .zone h3 {
-            margin: 0 0 5px 0;
-            color: #1e40af;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 0.05em;
-            text-align: center;
-            border-bottom: 1px solid #f1f5f9;
-            width: 100%;
-            padding-bottom: 5px;
-        }
-
-        .card-container {
-            width: 150px;
-            height: 85px;
-            min-height: 85px; 
-            perspective: 1000px;
-            cursor: grab;
-            user-select: none;
-            display: block;
-        }
-        .card-container:active {
-            cursor: grabbing;
-        }
-        .card {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.4s ease;
-            border-radius: 6px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .card.flipped {
-            transform: rotateY(180deg);
-        }
-        .card-front, .card-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px;
-            box-sizing: border-box;
-            text-align: center;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-        .card-front {
-            background: white;
-            border: 2px solid #475569;
-            color: #0f172a;
-        }
-        .card-back {
-            background: #1e3a8a;
-            color: white;
-            transform: rotateY(180deg);
-            font-size: 0.7rem;
-            font-weight: normal;
-            overflow-y: auto;
-            align-items: center;
-            text-align: center;
-            line-height: 1.3;
-        }
-
-        .card-container.matched {
-            cursor: pointer;
-            height: auto;
-            min-height: 60px;
-            width: 95%;
-        }
-        .card-container.matched .card {
-            min-height: 60px;
-            height: 60px;
-        }
-        .card-container.matched .card-front {
-            border-color: var(--success-color);
-            background-color: #ecfdf5;
-            color: #065f46;
-        }
-
-        .main-content {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-        }
-    </style>
-</head>
-<body>
-
-<header>
-    <h1>Autonomic Pharmacology Matcher 💊</h1>
-    <p>Drag the medications from the grey pool down into their correct target class. Correctly matched cards can be clicked to flip for study notes!</p>
-    <div id="score-tracker">Matched: <span id="match-count">0</span> / 41</div>
-</header>
-
-<div id="error-log"></div>
-
-<div id="deck-container">
-    <h2>Available Medications (Drag from here)</h2>
-    <div id="deck">Loading medications... if this message stays here, JavaScript execution is blocked or failed.</div>
-</div>
-
-<div class="main-content">
-    <div id="zones-container">
-        <div class="zone" data-class="nonselective-beta-blockers"><h3>Nonselective Beta-Blockers</h3></div>
-        <div class="zone" data-class="b1-blockers"><h3>B1 Blockers</h3></div>
-        <div class="zone" data-class="mixed-adrenergic-blockers"><h3>Mixed Adrenergic Blockers</h3></div>
-        <div class="zone" data-class="nonselective-beta-agonists"><h3>Nonselective Beta-Agonists</h3></div>
-        <div class="zone" data-class="b1-agonists"><h3>B1 Agonists</h3></div>
-        <div class="zone" data-class="b2-agonists"><h3>B2 Agonists</h3></div>
-        <div class="zone" data-class="b3-agonists"><h3>B3 Agonists</h3></div>
-        <div class="zone" data-class="mixed-adrenergic-agonists"><h3>Mixed Adrenergic Agonists</h3></div>
-        <div class="zone" data-class="nonselective-alpha-blockers"><h3>Nonselective Alpha-Blockers</h3></div>
-        <div class="zone" data-class="a1-blockers"><h3>A1 Blockers</h3></div>
-        <div class="zone" data-class="a2-blockers"><h3>A2 Blockers</h3></div>
-        <div class="zone" data-class="a1-agonists"><h3>A1 Agonists</h3></div>
-        <div class="zone" data-class="a2-agonists"><h3>A2 Agonists</h3></div>
-    </div>
-</div>
-
-<script>
-// Encapsulating variables safely
-const drugDatabase = [
-    { id: "d1", name: "Propranolol", class: "nonselective-beta-blockers", notes: "Indicated: Tremors, Migraine Prophylaxis, Thyroid Storm. Crosses BBB." },
-    { id: "d2", name: "Nadolol", class: "nonselective-beta-blockers", notes: "Indicated: Portal Hypertension. Hydrophilic -> cleared via kidneys." },
-    { id: "d3", name: "Timolol", class: "nonselective-beta-blockers", notes: "Indicated: Chronic Glaucoma. Decreases aqueous humor production." },
-    { id: "d4", name: "Pindolol", class: "nonselective-beta-blockers", notes: "Possesses Partial Intrinsic Sympathomimetic Activity (ISA)." },
-    { id: "d5", name: "Sotalol", class: "nonselective-beta-blockers", notes: "Class III Potassium (K+) Channel Blocker characteristics." },
-    { id: "d6", name: "Metoprolol", class: "b1-blockers", notes: "Indicated: Post MI, Heart Failure. Decreases mortality." },
-    { id: "d7", name: "Atenolol", class: "b1-blockers", notes: "Beta-1 selective blocker. Hydrophilic -> cleared by kidneys." },
-    { id: "d8", name: "Esmolol", class: "b1-blockers", notes: "Indicated: Aortic Dissection. Ultra-short acting; RBC esterases." },
-    { id: "d9", name: "Bisoprolol", class: "b1-blockers", notes: "Indicated: Heart Failure. Decreases mortality rate." },
-    { id: "d10", name: "Betaxolol", class: "b1-blockers", notes: "Beta-1 selective blocker used topically for Chronic Glaucoma." },
-    { id: "d11", name: "Acebutolol", class: "b1-blockers", notes: "Beta-1 selective blocker with Intrinsic Sympathomimetic Activity." },
-    { id: "d12", name: "Nebivolol", class: "b1-blockers", notes: "Stimulates Nitric Oxide (NO) release causing direct vasodilation." },
-    { id: "d13", name: "Carvedilol", class: "mixed-adrenergic-blockers", notes: "Blocks B1, B2, and A1. Heart Failure. Decreases mortality." },
-    { id: "d14", name: "Labetalol", class: "mixed-adrenergic-blockers", notes: "Blocks B1, B2, and A1. Used in Pre-eclampsia emergencies." },
-    { id: "d15", name: "Isoproterenol", class: "nonselective-beta-agonists", notes: "Action at B1 & B2. Used for severe Bradycardia & Torsades." },
-    { id: "d16", name: "Dobutamine", class: "b1-agonists", notes: "Indicated: Acute Heart Failure/Cardiogenic Shock. Inotropic." },
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Autonomic Pharmacology Matcher</title><style>:root{--bg:#f8fafc;--txt:#0f172a;--primary:#2563eb;--ok:#16a34a;--brd:#cbd5e1;--sel:#f59e0b}body{font-family:sans-serif;background:var(--bg);color:var(--txt);margin:0;padding:20px;display:flex;flex-direction:column;align-items:center}header{text-align:center;margin-bottom:20px;background:#fff;padding:15px;width:100%;max-width:1400px;box-sizing:border-box;border:1px solid var(--brd);border-radius:8px}#deck-container{width:100%;max-width:1400px;background:#e2e8f0;border:2px solid var(--brd);border-radius:8px;padding:20px;margin-bottom:30px;box-sizing:border-box}#deck{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;min-height:50px}#zones-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;width:100%;max-width:1400px;margin-bottom:40px}.zone{min-height:160px;background:#fff;border:2px dashed var(--brd);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:8px;align-items:center;cursor:pointer}.zone.ready-target{border-color:var(--primary);background:#f0f6ff}.zone h3{margin:0 0 5px 0;color:#1e40af;text-transform:uppercase;font-size:.8rem;letter-spacing:.05em;text-align:center;border-bottom:1px solid #f1f5f9;width:100%;padding-bottom:5px;pointer-events:none}.card-container{width:150px;height:80px;perspective:1000px;cursor:pointer;user-select:none}.card{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .4s ease;border-radius:6px;box-shadow:0 4px 6px rgba(0,0,0,.1)}.card.flipped{transform:rotateY(180deg)}.card-front,.card-back{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:6px;display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box;text-align:center;font-weight:600;font-size:.85rem}.card-front{background:#fff;border:2px solid #475569;color:#0f172a}.card-container.selected .card-front{border-color:var(--sel);background:#fffbeb;transform:scale(1.04)}.card-back{background:#1e3a8a;color:#fff;transform:rotateY(180deg);font-size:.7rem;font-weight:400;overflow-y:auto;align-items:center;line-height:1.3}.card-container.matched{height:55px;width:95%}.card-container.matched .card-front{border-color:var(--ok);background:#ecfdf5;color:#065f46}.main-content{width:100%;display:flex;justify-content:center}</style></head><body><header><h1>Autonomic Pharmacology Matcher 💊</h1><p><b>How to Play:</b> Click a card from the grey pool, then click its correct drug class box to place it! Click placed cards to flip them over.</p><div id="score-tracker">Matched: <span id="match-count">0</span> / 41</div></header><div id="deck-container"><h2>Available Medications (Click to select)</h2><div id="deck"></div></div><div class="main-content"><div id="zones-container"><div class="zone" data-class="ns-bb"><h3>Nonselective Beta-Blockers</h3></div><div class="zone" data-class="b1-b"><h3>B1 Blockers</h3></div><div class="zone" data-class="m-ab"><h3>Mixed Adrenergic Blockers</h3></div><div class="zone" data-class="ns-ba"><h3>Nonselective Beta-Agonists</h3></div><div class="zone" data-class="b1-a"><h3>B1 Agonists</h3></div><div class="zone" data-class="b2-a"><h3>B2 Agonists</h3></div><div class="zone" data-class="b3-a"><h3>B3 Agonists</h3></div><div class="zone" data-class="m-aa"><h3>Mixed Adrenergic Agonists</h3></div><div class="zone" data-class="ns-ab"><h3>Nonselective Alpha-Blockers</h3></div><div class="zone" data-class="a1-b"><h3>A1 Blockers</h3></div><div class="zone" data-class="a2-b"><h3>A2 Blockers</h3></div><div class="zone" data-class="a1-a"><h3>A1 Agonists</h3></div><div class="zone" data-class="a2-a"><h3>A2 Agonists</h3></div></div></div><script>
+const db=[
+    {id:"1",name:"Propranolol",class:"ns-bb",notes:"Tremors, Migraine, Thyroid Storm. Crosses BBB."},
+    {id:"2",name:"Nadolol", class:"ns-bb",notes:"Portal Hypertension. Hydrophilic -> renal clearance."},
+    {id:"3",name:"Timolol", class:"ns-bb",notes:"Chronic Glaucoma. Lowers aqueous humor production."},
+    {id:"4",name:"Pindolol",class:"ns-bb",notes:"Has Partial Intrinsic Sympathomimetic Activity (ISA)."},
+    {id:"5",name:"Sotalol", class:"ns-bb",notes:"Class III Potassium (K+) Channel Blocker traits."},
+    {id:"6",name:"Metoprolol",class:"b1-b",notes:"Post MI, Heart Failure. Decreases mortality rate."},
+    {id:"7",name:"Atenolol",class:"b1-b",notes:"Beta-1 selective blocker. Hydrophilic -> renal exit."},
+    {id:"8",name:"Esmolol", class:"b1-b",notes:"Aortic Dissection. Ultra-short acting via RBC esterases."},
+    {id:"9",name:"Bisoprolol",class:"b1-b",notes:"Chronic Heart Failure management. Lowers mortality."},
+    {id:"10",name:"Betaxolol",class:"b1-b",notes:"Beta-1 selective blocker drop for Chronic Glaucoma."},
+    {id:"11",name:"Acebutolol",class:"b1-b",notes:"Beta-1 selective blocker with mild ISA traits."},
+    {id:"12",name:"Nebivolol",class:"b1-b",notes:"Stimulates Nitric Oxide release for vasodilation."},
+    {id:"13",name:"Carvedilol",class:"m-ab",notes:"Blocks B1, B2, A1. Heart Failure. Lowers mortality."},
+    {id:"14",name:"Labetalol",class:"m-ab",notes:"Blocks B1, B2, A1. Hypertensive Pre-eclampsia emergency."},
+    {id:"15",name:"Isoproterenol",class:"ns-ba",notes:"Action at B1 & B2. For severe Bradycardia & Torsades."},
+    {id:"16",name:"Dobutamine",class:"b1-a",notes:"Acute Heart Failure/Cardiogenic Shock. Inotropic agent."},
+    {id:"17",name:"Albuterol",class:"b2-a",notes:"Short-Acting SABA rescue for Acute Asthma/COPD flare."},
+    {id:"18",name:"Levalbuterol",class:"b2-a",notes:"R-enantiomer of albuterol. Fewer tachycardia risks."},
+    {id:"19",name:"Salmeterol",class:"b2-a",notes:"Long-Acting LABA controller for asthma maintenance."},
+    {id:"20",name:"Formoterol",class:"b2-a",notes:"Long-Acting LABA controller with rapid onset action."},
+    {id:"21",name:"Mirabegron",class:"b3-a",notes:"Relaxes detrusor muscle. Treats Overactive Bladder."},
+    {id:"22",name:"Vibegron",class:"b3-a",notes:"Highly selective B3 agent for Overactive Bladder."},
+    {id:"23",name:"Epinephrine",class:"m-aa",notes:"Agonist at A1, A2, B1, B2. Choice for Anaphylaxis."},
+    {id:"24",name:"Norepinephrine",class:"m-aa",notes:"Agonist A1, A2 > B1. Vasopressor for Septic Shock."},
+    {id:"25",name:"Dopamine",class:"m-aa",notes:"Dose-dependent: D1/D2 (low), B1 (mid), A1 (high)."},
+    {id:"26",name:"Pseudoephedrine",class:"m-aa",notes:"Mixed action oral decongestant agent."},
+    {id:"27",name:"Phenoxybenzamine",class:"ns-ab",notes:"Irreversible blocker pre-op for Pheochromocytoma."},
+    {id:"28",name:"Phentolamine",class:"ns-ab",notes:"Reversible blocker for Norepinephrine extravasation."},
+    {id:"29",name:"Prazosin",class:"a1-b",notes:"Alpha-1 blocker. Treats HTN and PTSD nightmares."},
+    {id:"30",name:"Terazosin",class:"a1-b",notes:"Long-acting blocker targeting HTN and BPH relief."},
+    {id:"31",name:"Doxazosin",class:"a1-b",notes:"Alpha-1 blocker for hypertension & urinary retention."},
+    {id:"32",name:"Tamsulosin",class:"a1-b",notes:"Selective Alpha-1A for prostate. Low BP impact."},
+    {id:"33",name:"Silodosin",class:"a1-b",notes:"Highly selective Alpha-1A optimized for BPH flow."},
+    {id:"34",name:"Yohimbine",class:"a2-b",notes:"Alpha-2 blocker; boosts central sympathetic output."},
+    {id:"35",name:"Phenylephrine",class:"a1-a",notes:"Pure Alpha-1 agonist. Used as nasal decongestant."},
+    {id:"36",name:"Midodrine",class: "a1-a",notes:"Prodrug form for Orthostatic Hypotension support."},
+    {id:"37",name:"Oxymetazoline",class:"a1-a",notes:"Nasal spray. >3 days use causes rebound rhinitis."},
+    {id:"38",name:"Methoxamine",class:"a1-a",notes:"Pure Alpha-1 agonist for treating paroxysmal SVT."},
+    {id:"39",name:"Clonidine",class:"a2-a",notes:"Central Alpha-2 agonist. High rebound HTN danger."},
+    {id:"40",name:"Methyldopa",class:"a2-a",notes:"First-line choice for Hypertension in Pregnancy."},
+    {id:"41",name:"Brimonidine",class:"a2-a",notes:"Highly selective Alpha-2 drop to lower Glaucoma IOP."}
+];
+let score=0,selected=null;
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
+function init(){
+    const deck=document.getElementById("deck");deck.innerHTML="";
+    shuffle([...db]).forEach(d=>{
+        const c=document.createElement("div");c.className="card-container";c.id=d.id;c.dataset.class=d.class;
+        c.innerHTML=`<div class="card"><div class="card-front">${d.name}</div><div class="card-back">${d.notes}</div></div>`;
+        c.addEventListener("click",cardClk);deck.appendChild(c);
+    });
+    document.querySelectorAll(".zone").forEach(z=>{z.addEventListener("click",zoneClk)});
+}
+function cardClk(e){
+    const c=e.currentTarget;
+    if(c.classList.contains("matched")){c.querySelector(".card").classList.toggle("flipped");return}
+    if(selected){selected.classList.remove("selected")}
+    if(selected===c){selected=null;toggleHz(false);return}
+    selected=c;selected.classList.add("selected");toggleHz(true);
+}
+function zoneClk(e){
+    if(!selected)return;const z=e.currentTarget;
+    if(z.dataset.class===selected.dataset.class){
+        z.appendChild(selected);selected.classList.remove("selected");selected.classList.add("matched");
+        score++;document.getElementById("match-count").textContent=score;selected=null;toggleHz(false);
+        if(score===db.length){setTimeout(()=>{alert("🎉 Brilliant work! All matched successfully!")},300)}
+    }else{
+        z.style.borderColor="#ef4444";z.style.background="#fef2f2";
+        setTimeout(()=>{z.style.borderColor="";z.style.background=""},400);
+    }
+}
+function toggleHz(shw){document.querySelectorAll(".zone").forEach(z=>{if(shw){z.classList.add("ready-target")}else{z.classList.remove("ready-target")}})}
