@@ -12,7 +12,6 @@
             --success-color: #16a34a;
             --border-color: #cbd5e1;
         }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
@@ -23,7 +22,6 @@
             flex-direction: column;
             align-items: center;
         }
-
         header {
             text-align: center;
             margin-bottom: 20px;
@@ -35,11 +33,20 @@
             z-index: 100;
             border-bottom: 1px solid var(--border-color);
         }
-
-        h1 { margin: 0 0 5px 0; color: #1e3a8a; }
-        p { margin: 0; color: #64748b; font-size: 0.95rem; }
-        #score-tracker { font-weight: bold; color: var(--accent-color); margin-top: 5px; }
-
+        h1 {
+            margin: 0 0 5px 0;
+            color: #1e3a8a;
+        }
+        p {
+            margin: 0;
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+        #score-tracker {
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-top: 5px;
+        }
         /* Grid Layout for Drop Zones */
         #zones-container {
             display: grid;
@@ -49,7 +56,6 @@
             max-width: 1400px;
             margin-bottom: 40px;
         }
-
         .zone {
             min-height: 180px;
             background: white;
@@ -63,13 +69,11 @@
             transition: all 0.2s ease;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-
         .zone.drag-over {
             border-color: var(--accent-color);
             background-color: #eff6ff;
             transform: scale(1.01);
         }
-
         .zone h3 {
             margin: 0 0 5px 0;
             color: #1e40af;
@@ -81,21 +85,20 @@
             width: 100%;
             padding-bottom: 5px;
         }
-
-        /* Deck / Dock Area */
+        /* Deck / Dock Area - FIXED TO BOTTOM TO STAND OUT */
         #deck-container {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background: #e2e8f0;
-            padding: 15px;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
-            max-height: 200px;
+            background: #cbd5e1; /* Darker background contrast so it is clearly visible */
+            border-top: 3px solid #94a3b8;
+            padding: 20px;
+            box-shadow: 0 -10px 25px rgba(0,0,0,0.15);
+            height: 160px;
             overflow-y: auto;
             z-index: 1000;
         }
-
         #deck {
             display: flex;
             gap: 12px;
@@ -103,32 +106,34 @@
             justify-content: center;
             max-width: 1400px;
             margin: 0 auto;
+            min-height: 100px;
         }
-
-        /* 3D Card Mechanics */
+        /* Robust 3D Card Mechanics */
         .card-container {
             width: 150px;
             height: 85px;
+            min-height: 85px; /* Keeps card safe from vertical compression */
             perspective: 1000px;
             cursor: grab;
+            user-select: none;
+            display: block;
         }
-
-        .card-container:active { cursor: grabbing; }
-
+        .card-container:active {
+            cursor: grabbing;
+        }
         .card {
             width: 100%;
             height: 100%;
+            min-height: 85px;
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 0.5s ease;
+            transition: transform 0.4s ease;
             border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-
         .card.flipped {
             transform: rotateY(180deg);
         }
-
         .card-front, .card-back {
             position: absolute;
             width: 100%;
@@ -144,42 +149,42 @@
             font-weight: 600;
             font-size: 0.85rem;
         }
-
         .card-front {
             background: white;
-            border: 2px solid #94a3b8;
-            color: #1e293b;
+            border: 2px solid #475569;
+            color: #0f172a;
         }
-
         .card-back {
             background: #1e3a8a;
             color: white;
             transform: rotateY(180deg);
-            font-size: 0.68rem;
+            font-size: 0.7rem;
             font-weight: normal;
             overflow-y: auto;
-            align-items: flex-start;
-            text-align: left;
-            line-height: 1.2;
+            align-items: center;
+            text-align: center;
+            line-height: 1.3;
         }
-
         /* Correct Placement Modifier Styles */
         .card-container.matched {
             cursor: pointer;
-            height: 60px;
+            height: auto;
+            min-height: 60px;
             width: 95%;
         }
-        
+        .card-container.matched .card {
+            min-height: 60px;
+            height: 60px;
+        }
         .card-container.matched .card-front {
             border-color: var(--success-color);
             background-color: #ecfdf5;
             color: #065f46;
         }
-
-        /* Space-saver bottom padding */
+        /* Space-saver bottom padding so content doesn't hide behind deck */
         .main-content {
             width: 100%;
-            padding-bottom: 220px; 
+            padding-bottom: 240px;
             display: flex;
             justify-content: center;
         }
@@ -187,64 +192,58 @@
 </head>
 <body>
 
-    <header>
-        <h1>Autonomic Pharmacology Matcher 💊</h1>
-        <p>Drag all medications to their correct class. Matched cards can be clicked to flip over for study notes!</p>
-        <div id="score-tracker">Matched: <span id="match-count">0</span> / 41</div>
-    </header>
+<header>
+    <h1>Autonomic Pharmacology Matcher 💊</h1>
+    <p>Look at the grey dock at the bottom! Drag medications up to their correct drop zone class.</p>
+    <div id="score-tracker">Matched: <span id="match-count">0</span> / 41</div>
+</header>
 
-    <div class="main-content">
-        <!-- Target Categories Grid (13 Classes) -->
-        <div id="zones-container">
-            <div class="zone" data-class="nonselective-beta-blockers"><h3>Nonselective Beta-Blockers</h3></div>
-            <div class="zone" data-class="b1-blockers"><h3>B1 Blockers</h3></div>
-            <div class="zone" data-class="mixed-adrenergic-blockers"><h3>Mixed Adrenergic Blockers</h3></div>
-            <div class="zone" data-class="nonselective-beta-agonists"><h3>Nonselective Beta-Agonists</h3></div>
-            <div class="zone" data-class="b1-agonists"><h3>B1 Agonists</h3></div>
-            <div class="zone" data-class="b2-agonists"><h3>B2 Agonists</h3></div>
-            <div class="zone" data-class="b3-agonists"><h3>B3 Agonists</h3></div>
-            <div class="zone" data-class="mixed-adrenergic-agonists"><h3>Mixed Adrenergic Agonists</h3></div>
-            <div class="zone" data-class="nonselective-alpha-blockers"><h3>Nonselective Alpha-Blockers</h3></div>
-            <div class="zone" data-class="a1-blockers"><h3>A1 Blockers</h3></div>
-            <div class="zone" data-class="a2-blockers"><h3>A2 Blockers</h3></div>
-            <div class="zone" data-class="a1-agonists"><h3>A1 Agonists</h3></div>
-            <div class="zone" data-class="a2-agonists"><h3>A2 Agonists</h3></div>
-        </div>
+<div class="main-content">
+    <!-- Target Categories Grid (13 Classes) -->
+    <div id="zones-container">
+        <div class="zone" data-class="nonselective-beta-blockers"><h3>Nonselective Beta-Blockers</h3></div>
+        <div class="zone" data-class="b1-blockers"><h3>B1 Blockers</h3></div>
+        <div class="zone" data-class="mixed-adrenergic-blockers"><h3>Mixed Adrenergic Blockers</h3></div>
+        <div class="zone" data-class="nonselective-beta-agonists"><h3>Nonselective Beta-Agonists</h3></div>
+        <div class="zone" data-class="b1-agonists"><h3>B1 Agonists</h3></div>
+        <div class="zone" data-class="b2-agonists"><h3>B2 Agonists</h3></div>
+        <div class="zone" data-class="b3-agonists"><h3>B3 Agonists</h3></div>
+        <div class="zone" data-class="mixed-adrenergic-agonists"><h3>Mixed Adrenergic Agonists</h3></div>
+        <div class="zone" data-class="nonselective-alpha-blockers"><h3>Nonselective Alpha-Blockers</h3></div>
+        <div class="zone" data-class="a1-blockers"><h3>A1 Blockers</h3></div>
+        <div class="zone" data-class="a2-blockers"><h3>A2 Blockers</h3></div>
+        <div class="zone" data-class="a1-agonists"><h3>A1 Agonists</h3></div>
+        <div class="zone" data-class="a2-agonists"><h3>A2 Agonists</h3></div>
     </div>
+</div>
 
-    <!-- Random Spawn Container -->
-    <div id="deck-container">
-        <div id="deck"></div>
-    </div>
+<!-- Random Spawn Container at the bottom -->
+<div id="deck-container">
+    <div id="deck"></div>
+</div>
 
-    <script>
-        // Full Dataset: Exactly 41 medications mapped cleanly to their 13 categories
-        const drugDatabase = [
-            // Nonselective Beta-Blockers (5)
-            { id: "d1", name: "Propranolol", class: "nonselective-beta-blockers", notes: "Indicated: Tremors, Migraine Prophylaxis, Thyroid Storm. Lipophilic -> crosses Blood-Brain-Barrier." },
-            { id: "d2", name: "Nadolol", class: "nonselective-beta-blockers", notes: "Indicated: Portal Hypertension / Esophageal Varices. Hydrophilic -> cleared via Kidneys." },
-            { id: "d3", name: "Timolol", class: "nonselective-beta-blockers", notes: "Indicated: Chronic Glaucoma." },
-            { id: "d4", name: "Pindolol", class: "nonselective-beta-blockers", notes: "Possesses Partial Intrinsic Sympathomimetic Activity (ISA)." },
-            { id: "d5", name: "Sotalol", class: "nonselective-beta-blockers", notes: "Class III Potassium (K+) Channel Blocker characteristics." },
-            
-            // B1 Blockers (7)
-            { id: "d6", name: "Metoprolol", class: "b1-blockers", notes: "Indicated: Post MI, Chronic Heart Failure, Rate Control (Afib/flutter). *Decreases mortality*" },
-            { id: "d7", name: "Atenolol", class: "b1-blockers", notes: "Same indicators as Metoprolol & Bisoprolol EXCEPT chronic heart failure. Hydrophilic -> cleared by kidneys." },
-            { id: "d8", name: "Esmolol", class: "b1-blockers", notes: "Indicated: Acute Emergencies (Aortic Dissection). Ultra-short acting; metabolized rapidly by RBC esterases." },
-            { id: "d9", name: "Bisoprolol", class: "b1-blockers", notes: "Indicated: Post MI, Chronic Heart Failure, Rate Control (Afib/flutter). *Decreases mortality*" },
-            { id: "d10", name: "Betaxolol", class: "b1-blockers", notes: "Indicated: Chronic Glaucoma." },
-            { id: "d11", name: "Acebutolol", class: "b1-blockers", notes: "Possesses Partial Intrinsic Sympathomimetic Activity (ISA)." },
-            { id: "d12", name: "Nebivolol", class: "b1-blockers", notes: "Stimulates Nitric Oxide (NO) gas release causing direct vasodilation." },
-
-            // Mixed Adrenergic Blockers (2)
-            { id: "d13", name: "Carvedilol", class: "mixed-adrenergic-blockers", notes: "Indicated: Chronic Heart Failure. Blocks Beta1, Beta2, and Alpha1. *Decreases mortality*" },
-            { id: "d14", name: "Labetalol", class: "mixed-adrenergic-blockers", notes: "Indicated: Hypertensive Emergencies (Pre-eclampsia)." },
-
-            // Nonselective Beta-Agonists (1)
-            { id: "d15", name: "Isoproterenol", class: "nonselective-beta-agonists", notes: "Indicated: Severe Bradycardia, Heart Block, & Torsades de Pointes. Action at B1 & B2." },
-
-            // B1 Agonists (1)
-            { id: "d16", name: "Dobutamine", class: "b1-agonists", notes: "Indicated: Acute Heart Failure. Potent inotropic agent." },
-
-            // B2 Agonists (4)
-            { id: "d17", name: "Albuterol", class: "b2-agonists", notes: "Indicated: Acute Asthma/COPD. Short-Acting formulation." },
+<script>
+const drugDatabase = [
+    // Nonselective Beta-Blockers (5)
+    { id: "d1", name: "Propranolol", class: "nonselective-beta-blockers", notes: "Indicated: Tremors, Migraine Prophylaxis, Thyroid Storm. Crosses BBB." },
+    { id: "d2", name: "Nadolol", class: "nonselective-beta-blockers", notes: "Indicated: Portal Hypertension. Hydrophilic -> cleared via kidneys." },
+    { id: "d3", name: "Timolol", class: "nonselective-beta-blockers", notes: "Indicated: Chronic Glaucoma. Decreases aqueous humor production." },
+    { id: "d4", name: "Pindolol", class: "nonselective-beta-blockers", notes: "Possesses Partial Intrinsic Sympathomimetic Activity (ISA)." },
+    { id: "d5", name: "Sotalol", class: "nonselective-beta-blockers", notes: "Class III Potassium (K+) Channel Blocker characteristics." },
+    // B1 Blockers (7)
+    { id: "d6", name: "Metoprolol", class: "b1-blockers", notes: "Indicated: Post MI, Heart Failure. Decreases mortality." },
+    { id: "d7", name: "Atenolol", class: "b1-blockers", notes: "Beta-1 selective blocker. Hydrophilic -> cleared by kidneys." },
+    { id: "d8", name: "Esmolol", class: "b1-blockers", notes: "Indicated: Aortic Dissection. Ultra-short acting; RBC esterases." },
+    { id: "d9", name: "Bisoprolol", class: "b1-blockers", notes: "Indicated: Heart Failure. Decreases mortality rate." },
+    { id: "d10", name: "Betaxolol", class: "b1-blockers", notes: "Beta-1 selective blocker used topically for Chronic Glaucoma." },
+    { id: "d11", name: "Acebutolol", class: "b1-blockers", notes: "Beta-1 selective blocker with Intrinsic Sympathomimetic Activity." },
+    { id: "d12", name: "Nebivolol", class: "b1-blockers", notes: "Stimulates Nitric Oxide (NO) release causing direct vasodilation." },
+    // Mixed Adrenergic Blockers (2)
+    { id: "d13", name: "Carvedilol", class: "mixed-adrenergic-blockers", notes: "Blocks B1, B2, and A1. Heart Failure. Decreases mortality." },
+    { id: "d14", name: "Labetalol", class: "mixed-adrenergic-blockers", notes: "Blocks B1, B2, and A1. Used in Pre-eclampsia emergencies." },
+    // Nonselective Beta-Agonists (1)
+    { id: "d15", name: "Isoproterenol", class: "nonselective-beta-agonists", notes: "Action at B1 & B2. Used for severe Bradycardia & Torsades." },
+    // B1 Agonists (1)
+    { id: "d16", name: "Dobutamine", class: "b1-agonists", notes: "Indicated: Acute Heart Failure/Cardiogenic Shock. Inotropic." },
+    // B2 Agonists (4)
+    { id: "d17", name: "Albuterol", class: "b2-agonists", notes: "Short-Acting formulation (SABA) for Acute Asthma/COPD rescues." },
