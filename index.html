@@ -3,247 +3,354 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beta & Adrenergic Drug Sorting Game</title>
+    <title>ANS Pharmacology Sorting Game</title>
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f3f4;
-            overflow-x: hidden;
+        :root {
+            --bg-color: #f4f7f6;
+            --card-color: #ffffff;
+            --text-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
         }
+
         body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            padding: 15px;
+            align-items: center;
         }
-        header {
-            text-align: center;
-            margin-bottom: 15px;
-            flex-shrink: 0;
-        }
+
         h1 {
-            color: #2c3e50;
-            margin: 0 0 5px 0;
-            font-size: 1.8rem;
+            margin-bottom: 5px;
+            color: #1a252f;
         }
-        p {
-            color: #7f8c8d;
-            margin: 0;
+
+        .instructions {
+            margin-bottom: 25px;
             font-size: 0.95rem;
+            color: #7f8c8d;
+            text-align: center;
+            max-width: 600px;
         }
+
         #game-container {
             display: flex;
             flex-direction: column;
-            flex-grow: 1;
+            align-items: center;
             width: 100%;
-            gap: 15px;
-            min-height: 0;
+            max-width: 1200px;
+            gap: 30px;
         }
-        #cards-pool {
+
+        #card-deck {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            padding: 15px;
-            background: #ffffff;
-            border: 2px dashed #b2bec3;
-            border-radius: 8px;
-            min-height: 80px;
-            max-height: 180px;
-            overflow-y: auto;
             justify-content: center;
-            align-items: center;
-            flex-shrink: 0;
+            gap: 12px;
+            min-height: 120px;
+            width: 100%;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 8px;
+            border: 2px dashed #bdc3c7;
         }
+
         .drug-card {
-            background-color: #0984e3;
-            color: white;
-            padding: 10px 16px;
-            border-radius: 20px;
+            background-color: var(--card-color);
+            color: var(--text-color);
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-weight: 600;
             cursor: grab;
-            font-weight: bold;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 2px solid transparent;
+            transition: transform 0.2s, box-shadow 0.2s;
             user-select: none;
-            transition: transform 0.2s, background-color 0.3s;
-            font-size: 0.95rem;
-            margin: 4px 2px;
-            display: inline-block;
-            text-align: center;
-            touch-action: none;
+            position: relative;
         }
+
         .drug-card:active {
             cursor: grabbing;
-            transform: scale(1.05);
         }
-        .matched-card {
-            cursor: pointer !important;
-            touch-action: auto !important;
+
+        .drug-card.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
         }
-        .showing-info {
-            background-color: #e67e22 !important;
+
+        /* Tooltip hint styling */
+        .drug-card::after {
+            content: "Hint: " attr(data-hint);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #2c3e50;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: normal;
+            white-space: normal;
+            width: 220px;
+            z-index: 10;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            pointer-events: none;
         }
-        #classes-container {
+
+        .drug-card:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #zones-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
-            flex-grow: 1;
-            min-height: 0;
-            overflow-y: auto;
-            padding-bottom: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            width: 100%;
         }
-        .class-bucket {
-            background-color: #ffffff;
-            border: 2px solid #dfe6e9;
+
+        .class-box {
+            background-color: #ecf0f1;
+            border: 3px dashed #bdc3c7;
             border-radius: 8px;
-            padding: 12px;
+            padding: 15px;
+            min-height: 160px;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: background 0.2s;
-            min-height: 120px;
+            transition: background-color 0.2s, border-color 0.2s;
         }
-        .class-bucket h3 {
-            margin: 0 0 5px 0;
+
+        .class-box.drag-over {
+            background-color: #e8f4fd;
+            border-color: var(--accent-color);
+        }
+
+        .class-box h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
             text-align: center;
-            color: #2d3436;
-            border-bottom: 2px solid #00b894;
-            padding-bottom: 5px;
-            font-size: 0.95rem;
+            color: #34495e;
+            font-size: 1rem;
+            border-bottom: 2px solid #bdc3c7;
+            padding-bottom: 6px;
         }
-        .drag-over {
-            background-color: #e8f8f5;
-            border-color: #00b894;
+
+        .class-box .drug-card {
+            cursor: default;
+            box-shadow: none;
+            border: 2px solid #bdc3c7;
         }
-        #footer-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 10px;
-            border-top: 1px solid #dcdde1;
-            margin-top: auto;
-            flex-shrink: 0;
+
+        .class-box .drug-card::after {
+            display: none; /* Turn off hints once correctly placed */
         }
-        #score-board {
-            font-size: 1.2rem;
+
+        .class-box .drug-card.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border-color: var(--success-color);
+            animation: pop 0.3s ease;
+        }
+
+        .score-board {
+            font-size: 1.3rem;
             font-weight: bold;
-            color: #27ae60;
+            margin-top: 10px;
         }
-        .fs-btn {
-            background-color: #7f8c8d;
+
+        #reset-btn {
+            margin-top: 15px;
+            padding: 12px 24px;
+            background-color: var(--accent-color);
             color: white;
             border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
+            border-radius: 5px;
+            font-size: 1rem;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-weight: bold;
         }
-        .fs-btn:hover {
-            background-color: #2c3e50;
+
+        #reset-btn:hover {
+            background-color: #2980b9;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Beta & Adrenergic Drug Sorting Game</h1>
-        <p>Drag each medication card into its correct bucket. Once dropped, click any green card to toggle its high-yield info!</p>
-    </header>
+
+    <h1>ANS Autonomic Sorting Game</h1>
+    <div class="instructions">Drag each drug to its respective receptor class. Hover over a card to read its high-yield chart indications!</div>
+
     <div id="game-container">
-        <div id="cards-pool"></div>
-        <div id="classes-container">
-            <div class="class-bucket" data-class="Mixed Adrenergic Agonist"><h3>Mixed Adrenergic Agonists</h3></div>
-            <div class="class-bucket" data-class="Mixed Adrenergic Antagonist"><h3>Mixed Adrenergic ANTagonists</h3></div>
-            <div class="class-bucket" data-class="Beta 1 Agonist"><h3>Beta 1 Agonists</h3></div>
-            <div class="class-bucket" data-class="Beta 1 Antagonist"><h3>Beta 1 ANTagonists</h3></div>
-            <div class="class-bucket" data-class="Beta 2 Agonist"><h3>Beta 2 Agonists</h3></div>
-            <div class="class-bucket" data-class="Nonselective Beta Agonist"><h3>Nonselective Beta Agonists</h3></div>
-            <div class="class-bucket" data-class="Nonselective Beta Antagonist"><h3>Nonselective Beta ANTagonists</h3></div>
+        <!-- Unsorted Cards -->
+        <div id="card-deck"></div>
+
+        <!-- Target Classes -->
+        <div id="zones-container">
+            <div class="class-box" data-class="Nonselective Beta Blockers"><h3>Nonselective Beta Blockers</h3></div>
+            <div class="class-box" data-class="B1 Blockers"><h3>B1 Blockers</h3></div>
+            <div class="class-box" data-class="Mixed Adrenergic Blockers"><h3>Mixed Adrenergic Blockers</h3></div>
+            <div class="class-box" data-class="Nonselective Beta Agonists"><h3>Nonselective Beta Agonists</h3></div>
+            <div class="class-box" data-class="B1 Agonists"><h3>B1 Agonists</h3></div>
+            <div class="class-box" data-class="B2 Agonists"><h3>B2 Agonists</h3></div>
+            <div class="class-box" data-class="B3 Agonists"><h3>B3 Agonists</h3></div>
+            <div class="class-box" data-class="Mixed Adrenergic Agonists"><h3>Mixed Adrenergic Agonists</h3></div>
+            <div class="class-box" data-class="Nonselective Alpha Blockers"><h3>Nonselective Alpha Blockers</h3></div>
+            <div class="class-box" data-class="A1 Blockers"><h3>A1 Blockers</h3></div>
+            <div class="class-box" data-class="A2 Blockers"><h3>A2 Blockers</h3></div>
+            <div class="class-box" data-class="A1 Agonists"><h3>A1 Agonists</h3></div>
+            <div class="class-box" data-class="A2 Agonists"><h3>A2 Agonists</h3></div>
         </div>
-    </div>
-    <div id="footer-bar">
-        <div id="score-board">Progress: <span id="score">0</span> / <span id="total-cards">0</span></div>
-        <button class="fs-btn" onclick="toggleFullscreen()">Go Fullscreen</button>
+
+        <div class="score-board">Score: <span id="score">0</span> / <span id="total">0</span></div>
+        <button id="reset-btn" onclick="initGame()">Reshuffle & Restart</button>
     </div>
 
     <script>
         const drugData = [
-            { name: "Epinephrine", class: "Mixed Adrenergic Agonist", info: "Anaphylaxis -- Tachyarrhythmias", order: 1 },
-            { name: "Dopamine", class: "Mixed Adrenergic Agonist", info: "Shock -- Tachyarrhythmias", order: 2 },
+            // Nonselective Beta Blockers
+            { name: "Propranolol", class: "Nonselective Beta Blockers", hint: "Tremors, migraine prophylaxis, thyroid storm. Lipophilic (crosses BBB)." },
+            { name: "Nadolol", class: "Nonselective Beta Blockers", hint: "Portal HTN / esophageal varices. Hydrophilic (renal clearance)." },
+            { name: "Timolol", class: "Nonselective Beta Blockers", hint: "Chronic glaucoma." },
+            { name: "Pindolol", class: "Nonselective Beta Blockers", hint: "Partial Intrinsic Sympathomimetic Activity (ISA)." },
+            { name: "Sotalol", class: "Nonselective Beta Blockers", hint: "Class III K+ channel blocker." },
             
-            { name: "Carvedilol", class: "Mixed Adrenergic Antagonist", info: "Chronic Heart Failure -- Bradycardia", order: 1 },
-            { name: "Labetalol", class: "Mixed Adrenergic Antagonist", info: "HTN Emergencies -- Orthostatic Hypotension", order: 2 },
+            // B1 Blockers
+            { name: "Metoprolol", class: "B1 Blockers", hint: "Post-MI, CHF, rate control (Afib/flutter). *Decreases mortality*" },
+            { name: "Atenolol", class: "B1 Blockers", hint: "Same as Metoprolol except chronic heart failure. Hydrophilic, renal clearance." },
+            { name: "Esmolol", class: "B1 Blockers", hint: "Acute emergencies (Aortic Dissection). Metabolized by RBC esterases." },
+            { name: "Bisoprolol", class: "B1 Blockers", hint: "Post-MI, CHF, rate control. *Decreases mortality*" },
+            { name: "Betaxolol", class: "B1 Blockers", hint: "Chronic glaucoma." },
+            { name: "Acebutolol", class: "B1 Blockers", hint: "Partial Intrinsic Sympathomimetic Activity (ISA)." },
+            { name: "Nebivolol", class: "B1 Blockers", hint: "Stimulates Nitric Oxide (NO) release." },
             
-            { name: "Dobutamine", class: "Beta 1 Agonist", info: "Acute Heart Failure -- Tachycardia", order: 1 },
+            // Mixed Adrenergic Blockers
+            { name: "Carvedilol", class: "Mixed Adrenergic Blockers", hint: "Chronic heart failure. *Decreases mortality*" },
+            { name: "Labetalol", class: "Mixed Adrenergic Blockers", hint: "Hypertensive emergencies (PRE-E)." },
             
-            { name: "Metoprolol", class: "Beta 1 Antagonist", info: "Post MI -- Bradycardia", order: 1 },
-            { name: "Atenolol", class: "Beta 1 Antagonist", info: "Cleared by kidneys", order: 2 },
-            { name: "Esmolol", class: "Beta 1 Antagonist", info: "Metabolized by rbcs (Esterases)", order: 3 },
-            { name: "Bisoprolol", class: "Beta 1 Antagonist", info: "Post MI -- Bradycardia", order: 4 },
-            { name: "Betaxolol", class: "Beta 1 Antagonist", info: "(Info Pending)", order: 5 },
-            { name: "Acebutolol", class: "Beta 1 Antagonist", info: "Partial ISA agonist", order: 6 },
-            { name: "Nebivolol", class: "Beta 1 Antagonist", info: "NO mechanism (Nitric Oxide vasodilator)", order: 7 },
+            // Nonselective Beta Agonists
+            { name: "Isoproterenol", class: "Nonselective Beta Agonists", hint: "Severe bradycardia, heart block, Torsades de Pointes." },
             
-            { name: "Albuterol", class: "Beta 2 Agonist", info: "Acute Asthma -- Hypokalemia", order: 1 },
-            { name: "Terbutaline", class: "Beta 2 Agonist", info: "Tocolysis", order: 2 },
-            { name: "Salmeterol", class: "Beta 2 Agonist", info: "Chronic Asthma", order: 3 },
+            // B1 Agonists
+            { name: "Dobutamine", class: "B1 Agonists", hint: "Acute heart failure (Inotropic agent)." },
             
-            { name: "Isoproterenol", class: "Nonselective Beta Agonist", info: "Severe Bradycardia", order: 1 },
+            // B2 Agonists
+            { name: "Albuterol", class: "B2 Agonists", hint: "Acute asthma/COPD; Short-acting." },
+            { name: "Terbutaline", class: "B2 Agonists", hint: "Tocolysis (delaying preterm labor); Short-acting." },
+            { name: "Salmeterol", class: "B2 Agonists", hint: "Chronic asthma/COPD; Long-acting. Use with ICS." },
+            { name: "Formoterol", class: "B2 Agonists", hint: "Chronic asthma/COPD; Long-acting. Use with ICS." },
             
-            { name: "Propranolol", class: "Nonselective Beta Antagonist", info: "(Info Pending)", order: 1 },
-            { name: "Nadolol", class: "Nonselective Beta Antagonist", info: "(Info Pending)", order: 2 },
-            { name: "Timolol", class: "Nonselective Beta Antagonist", info: "(Info Pending)", order: 3 },
-            { name: "Pindolol", class: "Nonselective Beta Antagonist", info: "(Info Pending)", order: 4 },
-            { name: "Sotalol", class: "Nonselective Beta Antagonist", info: "(Info Pending)", order: 5 }
-        ];
-
-        const cardsPool = document.getElementById('cards-pool');
-        const buckets = document.querySelectorAll('.class-bucket');
-        const scoreDisplay = document.getElementById('score');
-        const totalDisplay = document.getElementById('total-cards');
-        
-        let matchedCount = 0;
-        totalDisplay.innerText = drugData.length;
-
-        function initGame() {
-            cardsPool.innerHTML = '';
-            matchedCount = 0;
-            scoreDisplay.innerText = matchedCount;
-
-            const shuffled = [...drugData].sort(() => Math.random() - 0.5);
-            shuffled.forEach((drug, index) => {
-                const card = document.createElement('div');
-                card.className = 'drug-card';
-                card.id = `drug-${index}`;
-                card.draggable = true;
-                card.innerText = drug.name;
-                card.setAttribute('data-name', drug.name);
-                card.setAttribute('data-class', drug.class);
-                card.setAttribute('data-info', drug.info);
-                card.setAttribute('data-order', drug.order);
-
-                card.addEventListener('dragstart', (e) => {
-                    e.dataTransfer.setData('text/plain', e.target.id);
-                });
-
-                card.addEventListener('touchstart', handleTouchStart, { passive: false });
-                card.addEventListener('touchmove', handleTouchMove, { passive: false });
-                card.addEventListener('touchend', handleTouchEnd, { passive: false });
-
-                cardsPool.appendChild(card);
-            });
-        }
-
-        let activeTouchCard = null;
-        function handleTouchStart(e) {
-            if (e.target.classList.contains('matched-card')) return;
-            activeTouchCard = e.target;
-            activeTouchCard.style.position = 'fixed';
-            activeTouchCard.style.zIndex = '1000';
-            moveCardAt(e.touches.clientX, e.touches.clientY);
-        }
-
-        function handleTouchMove(e) {
-            if (!activeTouchCard) return;
+            // B3 Agonists
+            { name: "Mirabegron", class: "B3 Agonists", hint: "Overactive bladder." },
+            
+            // Mixed Adrenergic Agonists
+	 { name: "Norepinephrine", class: "Mixed Adrenergic Agonists", hint: "Septic shock. Act on a1, a2, b1." },
+	 { name: "Epinephrine", class: "Mixed Adrenergic Agonists", hint: "Anaphylaxis & cardiac arrest. B dominant at low doses, A at high doses." }, 
+	 { name: "Dopamine", class: "Mixed Adrenergic Agonists", hint: "Shock with impaired renal perfusion. D @ low, B @ mid, A @ high doses." },
+	
+	// Nonselective Alpha Blockers
+	 { name: "Phenoxybenzamine", class: "Nonselective Alpha Blockers", hint: "Pheochromocytoma pre-op. Irreversible" },
+	 { name: "Phentolamine", class: "Nonselective Alpha Blockers", hint: "HTN crises & NE extravasation. Reversible" },
+	
+	// A1 Blockers
+	 { name: "Tamsulosin", class: "A1 Blockers", hint: "BPH. Selective for urinary tract." },
+	 { name: "Prazosin", class: "A1 Blockers", hint: "PTSD nightmares & BPH with HTN." },
+	 { name: "Terazosin", class: "A1 Blockers", hint: "BPH with HTN. Half-life is around 12 hours." },
+	 { name: "Doxazosin", class: "A1 Blockers", hint: "BPH with HTN. Half-life is around 22 hours." },
+	
+	// A2 Blockers
+	 { name: "Mirtazapine", class: "A2 Blockers", hint: "Atypical antidepressant. Depression with insomnia & weight loss. Serotonin/Histamine blocker." },
+	 { name: "Yohimbine", class: "A2 Blockers", hint: "Alpha-2 antagonist." },
+	
+	// A1 Agonists
+	 { name: "Phenylephrine", class: "A1 Agonists", hint: "Severe hypotension, nasal congestion, & mydriasis." },
+	 { name: "Midodrine", class: "A1 Agonists", hint: "Severe orthostatic hypotension." },
+	 { name: "Oxymetazoline", class: "A1 Agonists", hint: "Nasal congestion." },
+	
+	// A2 Agonists
+	 { name: "Clonidine", class: "A2 Agonists", hint: "HTN, ADHD, & Opioid withdrawal." },
+	 { name: "A-Methyldopa", class: "A2 Agonists", hint: "Gestational HTN. Causes Coombs(+) Positive Hemolytic Anemia." },
+	 { name: "Dexmedetomidine", class: "A2 Agonists", hint: "Procedural sedation. Does NOT cause respiratory depression!" },
+	 { name: "Tizanidine", class: "A2 Agonists", hint: "Severe muscle spasticity." },
+	 { name: "Guanfacine", class: "A2 Agonists", hint: "ADHD & Tourette's." },
+	 { name: "Brimonidine", class: "A2 Agonists", hint: "Chronic glaucoma." }
+	];
+	let score = 0;
+	function shuffle(array) {
+	return array.sort(() => Math.random() - 0.5);
+	}
+	function initGame() {
+	score = 0;
+	document.getElementById('score').innerText = score;
+	document.getElementById('total').innerText = drugData.length;
+	const deck = document.getElementById('card-deck');
+	deck.innerHTML = '';
+	document.querySelectorAll('.class-box').forEach(box => {
+	const header = box.querySelector('h3');
+	box.innerHTML = '';
+	box.appendChild(header);
+	});
+	const shuffledDrugs = shuffle([...drugData]);
+	shuffledDrugs.forEach((drug, index) => {
+	const card = document.createElement('div');
+	card.className = 'drug-card';
+	card.id = drug-${index};
+	card.draggable = true;
+	card.innerText = drug.name;
+	card.dataset.correctClass = drug.class;
+	card.setAttribute('data-hint', drug.hint);
+	card.addEventListener('dragstart', dragStart);
+	card.addEventListener('dragend', dragEnd);
+	deck.appendChild(card);
+	});
+	}
+	function dragStart(e) {
+	e.dataTransfer.setData('text/plain', e.target.id);
+	setTimeout(() => { e.target.classList.add('dragging'); }, 0);
+	}
+	function dragEnd(e) {
+	e.target.classList.remove('dragging');
+	}
+	const boxes = document.querySelectorAll('.class-box');
+	boxes.forEach(box => {
+	box.addEventListener('dragover', (e) => {
+	e.preventDefault();
+	box.classList.add('drag-over');
+	});
+	box.addEventListener('dragleave', () => { box.classList.remove('drag-over'); });
+	box.addEventListener('drop', (e) => {
+	e.preventDefault();
+	box.classList.remove('drag-over');
+	const cardId = e.dataTransfer.getData('text/plain');
+	const card = document.getElementById(cardId);
+	if (!card) return;
+	const targetClass = box.dataset.class;
+	const correctClass = card.dataset.correctClass;
+	if (targetClass === correctClass) {
+	card.draggable = false;
+	card.classList.add('correct');
+	box.appendChild(card);
+	score++;
+	document.getElementById('score').innerText = score;
+	} else {
+	card.style.borderColor = 'var(--error-color)';
+	setTimeout(() => { card.style.borderColor = 'transparent'; }, 500);
+	}
+	});
+	});
+window.onload = initGame;
